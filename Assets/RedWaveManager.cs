@@ -27,6 +27,7 @@ public class RedWaveManager : MonoBehaviour
     private bool playerHitThisWave = false;
     public TextMeshProUGUI livesHUD, timerHUD;
     private float timerNum;
+    public bool levelCompleted; // Return true if the player survives after the timer hits zero, and false if not.
 
     void Start()
     {
@@ -35,6 +36,7 @@ public class RedWaveManager : MonoBehaviour
         timerNum = Random.Range(30, 61);
         updateLives(player.lives);
         updateTimer(timerNum);
+        levelCompleted = false;
         StartCoroutine(WaveRoutine());
     }
 
@@ -44,7 +46,8 @@ public class RedWaveManager : MonoBehaviour
         updateTimer(timerNum);
         if (timerNum <= 0)
         {
-            player.WinGame();
+            updateTimer(0);
+            levelCompleted = true;
         }
     }
 
