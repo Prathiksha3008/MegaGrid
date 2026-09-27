@@ -1,6 +1,8 @@
 using UnityEngine;
+using TMPro; // Needed to update the Lives UI
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement; // Needed to handle scenes like restarting a level
 
 public class RedWaveManager : MonoBehaviour
 {
@@ -23,13 +25,27 @@ public class RedWaveManager : MonoBehaviour
     private bool isRowWave = true;
 
     private bool playerHitThisWave = false;
+    public TextMeshProUGUI livesHUD, timerHUD;
+    private float timerNum;
 
     void Start()
     {
         tiles = FindObjectsOfType<Tile>();
         player = FindObjectOfType<PlayerMovement>();
-
+        timerNum = Random.Range(30, 61);
+        updateLives(player.lives);
+        updateTimer(timerNum);
         StartCoroutine(WaveRoutine());
+    }
+
+    private void FixedUpdate()
+    {
+        timerNum -= Time.deltaTime;
+        updateTimer(timerNum);
+        if (timerNum <= 0)
+        {
+            player.WinGame();
+        }
     }
 
     // ==========================================
@@ -332,6 +348,7 @@ public class RedWaveManager : MonoBehaviour
             playerHitThisWave = true;
 
             player.lives--;
+            updateLives(player.lives);
 
             Debug.Log(
                 "RED WAVE HIT!"
@@ -342,11 +359,14 @@ public class RedWaveManager : MonoBehaviour
                 player.lives
             );
 
+            // If the player gets a game over, pause the game for some seconds, then reload the scene.
             if (player.lives <= 0)
             {
                 Debug.Log(
                     "GAME OVER!"
                 );
+                StartCoroutine(WaitRoutine(10));
+                SceneManager.LoadScene("SampleScene");
             }
         }
     }
@@ -374,5 +394,20 @@ public class RedWaveManager : MonoBehaviour
                     Color.blue;
             }
         }
+    }
+
+    private void updateLives(int num)
+    {
+        livesHUD.text = "Lives: " + num;
+    }
+
+    private void updateTimer(float num)
+    {
+        timerHUD.text = "Timer: " + num;
+    }
+
+    private IEnumerator WaitRoutine(int seconds)
+    {
+        yield return new WaitForSeconds(seconds);
     }
 }
