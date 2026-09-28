@@ -1288,6 +1288,7 @@ GameObject:
   - component: {fileID: 735736182}
   - component: {fileID: 735736181}
   - component: {fileID: 735736180}
+  - component: {fileID: 735736183}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -1380,6 +1381,18 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
+--- !u!114 &735736183
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 735736178}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0744132e0c7d61547ad4fb6402c590b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MoveUp
 --- !u!1 &755474941
 GameObject:
   m_ObjectHideFlags: 0
@@ -2424,6 +2437,12 @@ MonoBehaviour:
   waveDuration: 0.5
   livesHUD: {fileID: 571628315}
   timerHUD: {fileID: 2079181414}
+  levelCompleted: 0
+  arrows:
+  - {fileID: 4090227347807100207, guid: 6d5a1a9ecad0a6d4a8be192875955a13, type: 3}
+  - {fileID: 2558019931700922329, guid: 1b2e12a7ae5015e48a3d0a54bb25abb8, type: 3}
+  - {fileID: 1369149058157907169, guid: 55788fa2f53e0184ab0529963243511f, type: 3}
+  - {fileID: 5817052860365702975, guid: 64dc5c0fe20b35a4697393ed14033455, type: 3}
 --- !u!4 &1423735995
 Transform:
   m_ObjectHideFlags: 0
@@ -3450,6 +3469,7 @@ MonoBehaviour:
   jumpHeight: 1.2
   lives: 3
   score: 0
+  playerLoc: 0000000000000000i
 --- !u!1 &1950660618
 GameObject:
   m_ObjectHideFlags: 0
