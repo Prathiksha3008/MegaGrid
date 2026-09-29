@@ -29,14 +29,6 @@ public class RedWaveManager : MonoBehaviour
     private float timerNum;
     public bool levelCompleted; // Return true if the player survives after the timer hits zero, and false if not.
 
-    // Store in the array of arrow prefabs to indicate which row or column will have incoming red platforms.
-    // The indices correspond to the following arrows based on direction:
-    // 0: left; 1: right; 2: up; 3: down
-    public GameObject[] arrows;
-
-    // Defining the offsets for the indicator arrows
-    private float leftOffset = 0.0f, rightOffset = -0.2f, upOffset = 0.6f, downOffset = 0.0f;
-
     void Start()
     {
         tiles = FindObjectsOfType<Tile>();
@@ -73,6 +65,8 @@ public class RedWaveManager : MonoBehaviour
             playerHitThisWave = false;
 
             CreateWave();
+
+            yield return StartCoroutine(FlashWarningRoutine());
 
             yield return StartCoroutine(SweepWave());
 
@@ -150,12 +144,6 @@ public class RedWaveManager : MonoBehaviour
                     Random.Range(0, choices)
                 ];
 
-            Vector3 leftSpawn = new Vector3(5.0f, 0.5f, currentWaveIndex+leftOffset);
-            Instantiate(arrows[0], leftSpawn, arrows[0].transform.rotation);
-
-            Vector3 rightSpawn = new Vector3(-2.0f, 0.5f, currentWaveIndex + rightOffset);
-            Instantiate(arrows[1], rightSpawn, arrows[1].transform.rotation);
-
             Debug.Log(
                 "=============================="
             );
@@ -221,12 +209,6 @@ public class RedWaveManager : MonoBehaviour
                 possibleColumns[
                     Random.Range(0, choices)
                 ];
-
-            Vector3 upSpawn = new Vector3(currentWaveIndex + upOffset, 0.5f, -2.5f);
-            Instantiate(arrows[2], upSpawn, arrows[2].transform.rotation);
-            
-            Vector3 downSpawn = new Vector3(currentWaveIndex + downOffset, 0.5f, 4.5f);
-            Instantiate(arrows[3], downSpawn, arrows[3].transform.rotation);
 
             Debug.Log(
                 "=============================="
@@ -432,5 +414,49 @@ public class RedWaveManager : MonoBehaviour
     private IEnumerator WaitRoutine(int seconds)
     {
         yield return new WaitForSeconds(seconds);
+    }
+
+    private IEnumerator FlashWarningRoutine()
+    {
+        for (int step = 0; step < 5; step++)
+        {
+            foreach (Tile tile in tiles)
+            {
+                int tileRow =
+                    Mathf.RoundToInt(
+                        tile.transform.position.z
+                    );
+
+                int tileColumn =
+                    Mathf.RoundToInt(
+                        tile.transform.position.x
+                    );
+
+                bool isWaveTile = false;
+
+                // ROW
+                if (isRowWave)
+                {
+                    isWaveTile =
+                        tileRow == currentWaveIndex &&
+                        tileColumn == step;
+                }
+
+                // COLUMN
+                else
+                {
+                    isWaveTile =
+                        tileColumn == currentWaveIndex &&
+                        tileRow == step;
+                }
+
+                if (isWaveTile)
+                {
+                    tile.GetComponent<Renderer>().material.color =
+                        Color.orange;
+                }
+            }
+        }
+        yield return new WaitForSeconds(2.5f);
     }
 }

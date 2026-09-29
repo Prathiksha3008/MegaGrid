@@ -15,13 +15,10 @@ public class PlayerMovement : MonoBehaviour
     private bool gameWon = false;
 
     private RedWaveManager isWaveOver;
-    public int[] playerLoc = { 0, 0 };
 
     private void Start()
     {
         isWaveOver = FindObjectOfType<RedWaveManager>();
-        playerLoc[0] = 4;
-        playerLoc[1] = 0;
     }
 
     void Update()
@@ -40,7 +37,6 @@ public class PlayerMovement : MonoBehaviour
                 Keyboard.current.upArrowKey.isPressed)
             {
                 TryMove(Vector3.forward, 2, true);
-                playerLoc[1] += 2;
                 return;
             }
 
@@ -48,7 +44,6 @@ public class PlayerMovement : MonoBehaviour
                 Keyboard.current.downArrowKey.isPressed)
             {
                 TryMove(Vector3.back, 2, true);
-                playerLoc[1] -= 2;
                 return;
             }
 
@@ -56,7 +51,6 @@ public class PlayerMovement : MonoBehaviour
                 Keyboard.current.leftArrowKey.isPressed)
             {
                 TryMove(Vector3.left, 2, true);
-                playerLoc[0] -= 2;
                 return;
             }
 
@@ -64,7 +58,6 @@ public class PlayerMovement : MonoBehaviour
                 Keyboard.current.rightArrowKey.isPressed)
             {
                 TryMove(Vector3.right, 2, true);
-                playerLoc[0] += 2;
                 return;
             }
 
@@ -81,7 +74,6 @@ public class PlayerMovement : MonoBehaviour
             Keyboard.current.upArrowKey.wasPressedThisFrame)
         {
             TryMove(Vector3.forward, 1, false);
-            playerLoc[1] += 1;
             return;
         }
 
@@ -89,7 +81,6 @@ public class PlayerMovement : MonoBehaviour
             Keyboard.current.downArrowKey.wasPressedThisFrame)
         {
             TryMove(Vector3.back, 1, false);
-            playerLoc[1] -= 1;
             return;
         }
 
@@ -97,7 +88,6 @@ public class PlayerMovement : MonoBehaviour
             Keyboard.current.leftArrowKey.wasPressedThisFrame)
         {
             TryMove(Vector3.left, 1, false);
-            playerLoc[0] -= 1;
             return;
         }
 
@@ -105,7 +95,6 @@ public class PlayerMovement : MonoBehaviour
             Keyboard.current.rightArrowKey.wasPressedThisFrame)
         {
             TryMove(Vector3.right, 1, false);
-            playerLoc[0] += 1;
             return;
         }
     }
@@ -315,7 +304,7 @@ public class PlayerMovement : MonoBehaviour
                 transform.position.z
             );
 
-        if (playerLoc[0] == 0 && playerLoc[1] == 4 && isWaveOver.levelCompleted)
+        if (playerX == 0 && playerZ == 4 && isWaveOver.levelCompleted)
         {
             WinGame();
         }
