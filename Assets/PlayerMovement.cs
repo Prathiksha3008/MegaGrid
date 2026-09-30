@@ -287,19 +287,37 @@ public class PlayerMovement : MonoBehaviour
     void CheckForGoal()
     {
         int playerX =
-            Mathf.RoundToInt(
-                transform.position.x
-            );
+       Mathf.RoundToInt(transform.position.x);
 
         int playerZ =
-            Mathf.RoundToInt(
-                transform.position.z
-            );
+            Mathf.RoundToInt(transform.position.z);
 
-        if (playerX == 0 &&
-            playerZ == 4)
+        Tile[] allTiles =
+            FindObjectsOfType<Tile>();
+
+        foreach (Tile tile in allTiles)
         {
-            WinGame();
+            int tileX =
+                Mathf.RoundToInt(
+                    tile.transform.position.x
+                );
+
+            int tileZ =
+                Mathf.RoundToInt(
+                    tile.transform.position.z
+                );
+
+            if (tileX == playerX &&
+                tileZ == playerZ)
+            {
+                if (tile.tileType ==
+                    Tile.TileType.Gold)
+                {
+                    WinGame();
+                }
+
+                return;
+            }
         }
     }
 

@@ -256,8 +256,11 @@ public class RedWaveManager : MonoBehaviour
 
                 if (isWaveTile)
                 {
-                    tile.GetComponent<Renderer>().material.color =
-                        Color.red;
+                    if (tile.tileType != Tile.TileType.Gold)
+                    {
+                        tile.GetComponent<Renderer>().material.color =
+                            Color.red;
+                    }
                 }
             }
 
@@ -362,17 +365,7 @@ public class RedWaveManager : MonoBehaviour
 
         foreach (Tile tile in tiles)
         {
-            if (tile.tileType ==
-                Tile.TileType.Target)
-            {
-                tile.GetComponent<Renderer>().material.color =
-                    Color.green;
-            }
-            else
-            {
-                tile.GetComponent<Renderer>().material.color =
-                    Color.blue;
-            }
+            tile.UpdateColor();
         }
     }
 }

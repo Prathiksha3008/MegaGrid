@@ -1944,6 +1944,51 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tile
   tileType: 0
+--- !u!1 &1278306027
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1278306029}
+  - component: {fileID: 1278306028}
+  m_Layer: 0
+  m_Name: GoldenTile
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1278306028
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1278306027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c79363af146e3484fa127574a9748b0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoldenTileManager
+  spawnDelay: 15
+--- !u!4 &1278306029
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1278306027}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2.55486, y: -0, z: -5.61378}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1285497884
 GameObject:
   m_ObjectHideFlags: 0
@@ -2101,6 +2146,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RedWaveManager
   waveInterval: 2
   tileDelay: 0.15
+  waveDuration: 0.5
 --- !u!4 &1423735995
 Transform:
   m_ObjectHideFlags: 0
@@ -3124,6 +3170,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   moveSpeed: 5
+  jumpHeight: 1.2
   lives: 3
   score: 0
 --- !u!1 &1950660618
@@ -3790,3 +3837,4 @@ SceneRoots:
   - {fileID: 503136303}
   - {fileID: 1853469424}
   - {fileID: 1423735995}
+  - {fileID: 1278306029}

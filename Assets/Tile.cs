@@ -6,7 +6,8 @@ public class Tile : MonoBehaviour
     {
         Normal,
         Hazard,
-        Target
+        Target,
+        Gold
     }
 
     public TileType tileType = TileType.Normal;
@@ -19,8 +20,19 @@ public class Tile : MonoBehaviour
         UpdateColor();
     }
 
-    void UpdateColor()
+    public void SetTileType(TileType newType)
     {
+        tileType = newType;
+        UpdateColor();
+    }
+
+    public void UpdateColor()
+    {
+        if (tileRenderer == null)
+        {
+            tileRenderer = GetComponent<Renderer>();
+        }
+
         if (tileType == TileType.Normal)
         {
             tileRenderer.material.color = Color.blue;
@@ -32,6 +44,11 @@ public class Tile : MonoBehaviour
         else if (tileType == TileType.Target)
         {
             tileRenderer.material.color = Color.green;
+        }
+        else if (tileType == TileType.Gold)
+        {
+            tileRenderer.material.color =
+                new Color(1f, 0.65f, 0f);
         }
     }
 }
