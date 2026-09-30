@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using System.Collections;
 
 public class PlayerMovement : MonoBehaviour
@@ -12,6 +13,13 @@ public class PlayerMovement : MonoBehaviour
 
     private bool canMove = true;
     private bool gameWon = false;
+
+    private RedWaveManager isWaveOver;
+
+    private void Start()
+    {
+        isWaveOver = FindObjectOfType<RedWaveManager>();
+    }
 
     void Update()
     {
@@ -296,8 +304,7 @@ public class PlayerMovement : MonoBehaviour
                 transform.position.z
             );
 
-        if (playerX == 0 &&
-            playerZ == 4)
+        if (playerX == 0 && playerZ == 4 && isWaveOver.levelCompleted)
         {
             WinGame();
         }
@@ -307,7 +314,7 @@ public class PlayerMovement : MonoBehaviour
     // WIN
     // ==========================================
 
-    void WinGame()
+    public void WinGame()
     {
         gameWon = true;
 
@@ -315,5 +322,11 @@ public class PlayerMovement : MonoBehaviour
         Debug.Log("          YOU WIN!");
         Debug.Log("       GOAL REACHED!");
         Debug.Log("==============================");
+        StartCoroutine(WaitRoutine(10));
+        SceneManager.LoadScene("SampleScene");
+    }
+    private IEnumerator WaitRoutine(int seconds)
+    {
+        yield return new WaitForSeconds(seconds);
     }
 }

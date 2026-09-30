@@ -6,7 +6,8 @@ public class Tile : MonoBehaviour
     {
         Normal,
         Hazard,
-        Target
+        Target,
+        Warning
     }
 
     public TileType tileType = TileType.Normal;
@@ -32,6 +33,10 @@ public class Tile : MonoBehaviour
         else if (tileType == TileType.Target)
         {
             tileRenderer.material.color = Color.green;
+        }
+        else if (tileType == TileType.Warning)
+        {
+            tileRenderer.material.color = Color.orange;
         }
     }
 }
