@@ -7,6 +7,7 @@ public class Tile : MonoBehaviour
         Normal,
         Hazard,
         Target,
+        Warning,
         Gold
     }
 
@@ -44,6 +45,10 @@ public class Tile : MonoBehaviour
         else if (tileType == TileType.Target)
         {
             tileRenderer.material.color = Color.green;
+        }
+        else if (tileType == TileType.Warning)
+        {
+            tileRenderer.material.color = Color.orange;
         }
         else if (tileType == TileType.Gold)
         {

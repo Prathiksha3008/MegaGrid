@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using System.Collections;
 
 public class PlayerMovement : MonoBehaviour
@@ -12,6 +13,13 @@ public class PlayerMovement : MonoBehaviour
 
     private bool canMove = true;
     private bool gameWon = false;
+
+    private RedWaveManager isWaveOver;
+
+    private void Start()
+    {
+        isWaveOver = FindObjectOfType<RedWaveManager>();
+    }
 
     void Update()
     {
@@ -207,7 +215,7 @@ public class PlayerMovement : MonoBehaviour
         transform.position =
             targetPosition;
 
-        // Only check the LANDING tile
+        // Only check the landing tile
         CheckForGoal();
 
         canMove = true;
@@ -246,7 +254,6 @@ public class PlayerMovement : MonoBehaviour
                     elapsed / duration
                 );
 
-            // Horizontal movement
             Vector3 position =
                 Vector3.Lerp(
                     startPosition,
@@ -254,7 +261,6 @@ public class PlayerMovement : MonoBehaviour
                     t
                 );
 
-            // Parabolic jump arc
             float arc =
                 Mathf.Sin(t * Mathf.PI) *
                 jumpHeight;
@@ -287,10 +293,17 @@ public class PlayerMovement : MonoBehaviour
     void CheckForGoal()
     {
         int playerX =
-       Mathf.RoundToInt(transform.position.x);
+            Mathf.RoundToInt(transform.position.x);
 
         int playerZ =
             Mathf.RoundToInt(transform.position.z);
+
+        // Player cannot win until the level is complete
+        if (isWaveOver == null ||
+            !isWaveOver.levelCompleted)
+        {
+            return;
+        }
 
         Tile[] allTiles =
             FindObjectsOfType<Tile>();
@@ -325,13 +338,30 @@ public class PlayerMovement : MonoBehaviour
     // WIN
     // ==========================================
 
-    void WinGame()
+    public void WinGame()
     {
+        if (gameWon)
+            return;
+
         gameWon = true;
+        canMove = false;
 
         Debug.Log("==============================");
         Debug.Log("          YOU WIN!");
-        Debug.Log("       GOAL REACHED!");
+        Debug.Log("       GOLD TILE REACHED!");
         Debug.Log("==============================");
+
+        StartCoroutine(WinRoutine());
+    }
+
+    // ==========================================
+    // RESTART AFTER WIN
+    // ==========================================
+
+    private IEnumerator WinRoutine()
+    {
+        yield return new WaitForSeconds(10f);
+
+        SceneManager.LoadScene("SampleScene");
     }
 }
