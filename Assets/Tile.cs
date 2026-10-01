@@ -7,7 +7,8 @@ public class Tile : MonoBehaviour
         Normal,
         Hazard,
         Target,
-        Warning
+        Warning,
+        Gold
     }
 
     public TileType tileType = TileType.Normal;
@@ -20,23 +21,79 @@ public class Tile : MonoBehaviour
         UpdateColor();
     }
 
-    void UpdateColor()
+    public void SetTileType(TileType newType)
     {
-        if (tileType == TileType.Normal)
+        tileType = newType;
+        UpdateColor();
+    }
+
+    public void UpdateColor()
+    {
+        if (tileRenderer == null)
         {
-            tileRenderer.material.color = Color.blue;
+            tileRenderer = GetComponent<Renderer>();
         }
-        else if (tileType == TileType.Hazard)
+
+        if (tileRenderer == null)
+            return;
+
+        // Turn emission off by default
+        tileRenderer.material.DisableKeyword("_EMISSION");
+
+        switch (tileType)
         {
-            tileRenderer.material.color = Color.red;
-        }
-        else if (tileType == TileType.Target)
-        {
-            tileRenderer.material.color = Color.green;
-        }
-        else if (tileType == TileType.Warning)
-        {
-            tileRenderer.material.color = Color.orange;
+            case TileType.Normal:
+
+                tileRenderer.material.color =
+                    Color.blue;
+
+                break;
+
+            case TileType.Hazard:
+
+                tileRenderer.material.color =
+                    Color.red;
+
+                break;
+
+            case TileType.Target:
+
+                tileRenderer.material.color =
+                    Color.green;
+
+                break;
+
+            case TileType.Warning:
+
+                tileRenderer.material.color =
+                    Color.orange;
+
+                break;
+
+            case TileType.Gold:
+
+                // Bright yellow
+                Color goldColor =
+                    new Color(
+                        1f,
+                        0.9f,
+                        0.05f
+                    );
+
+                tileRenderer.material.color =
+                    goldColor;
+
+                // Emissive yellow
+                tileRenderer.material.EnableKeyword(
+                    "_EMISSION"
+                );
+
+                tileRenderer.material.SetColor(
+                    "_EmissionColor",
+                    goldColor * 4f
+                );
+
+                break;
         }
     }
 }

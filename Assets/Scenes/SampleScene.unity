@@ -371,6 +371,97 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tile
   tileType: 0
+--- !u!1 &216232078
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 216232080}
+  - component: {fileID: 216232079}
+  m_Layer: 0
+  m_Name: GreenTileManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &216232079
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 216232078}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93d16239d8e0f4a40a43f3ba911e42da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GreenTileManager
+  maxGreenTiles: 3
+  greenLifetime: 3
+  spawnInterval: 0.5
+--- !u!4 &216232080
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 216232078}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.50264, y: 0, z: 2.78997}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &293520261
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 293520263}
+  - component: {fileID: 293520262}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &293520262
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 293520261}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c79363af146e3484fa127574a9748b0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoldenTileManager
+--- !u!4 &293520263
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 293520261}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2.55486, y: -0, z: -5.61378}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &296292344
 GameObject:
   m_ObjectHideFlags: 0
@@ -710,7 +801,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: 0.3420201, y: 0, z: 0, w: 0.9396927}
-  m_LocalPosition: {x: 2, y: 7, z: -7}
+  m_LocalPosition: {x: 3.65, y: 10.29, z: -10.93}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1772,7 +1863,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1274ab1642a2e47fa8ed727cd67f7c14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tile
-  tileType: 2
+  tileType: 0
 --- !u!1 &944029103
 GameObject:
   m_ObjectHideFlags: 0
@@ -2432,17 +2523,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ff53f0f682ac4169b9598bdcfaf0837, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RedWaveManager
-  waveInterval: 2
-  tileDelay: 0.15
-  waveDuration: 0.5
+  gridSize: 9
+  waveInterval: 0.25
+  tileDelay: 0.025
+  waveDuration: 0.25
+  warningDuration: 0.6
+  minimumGameTime: 30
+  maximumGameTime: 60
   livesHUD: {fileID: 571628315}
   timerHUD: {fileID: 2079181414}
   levelCompleted: 0
-  arrows:
-  - {fileID: 4090227347807100207, guid: 6d5a1a9ecad0a6d4a8be192875955a13, type: 3}
-  - {fileID: 2558019931700922329, guid: 1b2e12a7ae5015e48a3d0a54bb25abb8, type: 3}
-  - {fileID: 1369149058157907169, guid: 55788fa2f53e0184ab0529963243511f, type: 3}
-  - {fileID: 5817052860365702975, guid: 64dc5c0fe20b35a4697393ed14033455, type: 3}
 --- !u!4 &1423735995
 Transform:
   m_ObjectHideFlags: 0
@@ -2710,6 +2800,53 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tile
   tileType: 0
+--- !u!1 &1563507492
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1563507494}
+  - component: {fileID: 1563507493}
+  m_Layer: 0
+  m_Name: GridGenerator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1563507493
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1563507492}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 574cb12cc6bd7bf41b0dd0482774dc4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GridGenerator
+  gridSize: 9
+  tileSpacing: 1
+  tileTemplate: {fileID: 1950660618}
+--- !u!4 &1563507494
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1563507492}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.50264, y: 0, z: 2.78997}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1571939410
 GameObject:
   m_ObjectHideFlags: 0
@@ -3469,7 +3606,7 @@ MonoBehaviour:
   jumpHeight: 1.2
   lives: 3
   score: 0
-  playerLoc: 0000000000000000i
+  gridSize: 9
 --- !u!1 &1950660618
 GameObject:
   m_ObjectHideFlags: 0
@@ -4273,3 +4410,6 @@ SceneRoots:
   - {fileID: 1853469424}
   - {fileID: 1423735995}
   - {fileID: 755474944}
+  - {fileID: 293520263}
+  - {fileID: 216232080}
+  - {fileID: 1563507494}
