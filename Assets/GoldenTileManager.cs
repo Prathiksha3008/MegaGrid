@@ -4,39 +4,55 @@ using System.Collections.Generic;
 
 public class GoldenTileManager : MonoBehaviour
 {
-    [Header("Golden Tile Settings")]
-    public float spawnDelay = 15f;
-
     private Tile[] tiles;
+
     private Tile goldenTile;
+
+    private RedWaveManager redWaveManager;
+
+    private bool goldSpawned = false;
 
     void Start()
     {
-        tiles = FindObjectsOfType<Tile>();
+        tiles =
+            FindObjectsOfType<Tile>();
 
-        StartCoroutine(GoldenTileRoutine());
+        redWaveManager =
+            FindObjectOfType<RedWaveManager>();
+
+        StartCoroutine(
+            WaitForLevelComplete()
+        );
     }
 
-    IEnumerator GoldenTileRoutine()
+    IEnumerator WaitForLevelComplete()
     {
-        Debug.Log(
-            "Golden tile will appear in " +
-            spawnDelay +
-            " seconds."
-        );
+        while (redWaveManager != null &&
+               !redWaveManager.levelCompleted)
+        {
+            yield return null;
+        }
 
-        yield return new WaitForSeconds(spawnDelay);
-
-        SpawnGoldenTile();
+        if (!goldSpawned)
+        {
+            SpawnGoldenTile();
+        }
     }
 
     void SpawnGoldenTile()
     {
-        List<Tile> availableTiles = new List<Tile>();
+        // Refresh tile list in case grid was generated
+        // after this manager started.
+        tiles =
+            FindObjectsOfType<Tile>();
+
+        List<Tile> availableTiles =
+            new List<Tile>();
 
         foreach (Tile tile in tiles)
         {
-            if (tile.tileType == Tile.TileType.Normal)
+            if (tile.tileType ==
+                Tile.TileType.Normal)
             {
                 availableTiles.Add(tile);
             }
@@ -52,14 +68,28 @@ public class GoldenTileManager : MonoBehaviour
         }
 
         int randomIndex =
-            Random.Range(0, availableTiles.Count);
+            Random.Range(
+                0,
+                availableTiles.Count
+            );
 
-        goldenTile = availableTiles[randomIndex];
+        goldenTile =
+            availableTiles[randomIndex];
 
-        goldenTile.SetTileType(Tile.TileType.Gold);
+        goldenTile.SetTileType(
+            Tile.TileType.Gold
+        );
 
-        Debug.Log("==============================");
-        Debug.Log("       GOLD TILE APPEARED!");
+        goldSpawned = true;
+
+        Debug.Log(
+            "=============================="
+        );
+
+        Debug.Log(
+            "GOLD TILE APPEARED!"
+        );
+
         Debug.Log(
             "Position: (" +
             Mathf.RoundToInt(
@@ -71,6 +101,9 @@ public class GoldenTileManager : MonoBehaviour
             ) +
             ")"
         );
-        Debug.Log("==============================");
+
+        Debug.Log(
+            "=============================="
+        );
     }
 }

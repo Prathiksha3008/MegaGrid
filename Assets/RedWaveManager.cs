@@ -1,53 +1,153 @@
 using UnityEngine;
-using TMPro; // Needed to update the Lives UI
+using TMPro;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.SceneManagement; // Needed to handle scenes like restarting a level
 
 public class RedWaveManager : MonoBehaviour
 {
     // ==========================================
+    // GRID SETTINGS
+    // ==========================================
+
+    [Header("Grid Settings")]
+    public int gridSize = 9;
+
+    // ==========================================
     // WAVE SETTINGS
     // ==========================================
 
-    public float waveInterval = 1.5f;
+    [Header("Wave Settings")]
 
-    // How quickly the red wave fills its row/column
-    public float tileDelay = 0.08f;
+    // Time between one completed wave and
+    // the next warning.
+    public float waveInterval = 0.20f;
 
-    // How long the complete wave remains visible
-    public float waveDuration = 0.5f;
+    // Speed of red sweep.
+    // Smaller = faster.
+    public float tileDelay = 0.025f;
+
+    // How long red stays after sweep finishes.
+    public float waveDuration = 0.20f;
+
+    // How long orange warning stays.
+    public float warningDuration = 0.60f;
+
+    // ==========================================
+    // GAME SETTINGS
+    // ==========================================
+
+    [Header("Game Settings")]
+
+    public float minimumGameTime = 30f;
+    public float maximumGameTime = 60f;
+
+    // ==========================================
+    // UI
+    // ==========================================
+
+    [Header("UI")]
+
+    public TextMeshProUGUI livesHUD;
+    public TextMeshProUGUI timerHUD;
+
+    // ==========================================
+    // PRIVATE VARIABLES
+    // ==========================================
 
     private Tile[] tiles;
     private PlayerMovement player;
 
-    private int currentWaveIndex = -1;
-    private bool isRowWave = true;
+    private List<int> currentWaveIndices =
+        new List<int>();
 
+    private bool isRowWave = true;
     private bool playerHitThisWave = false;
-    public TextMeshProUGUI livesHUD, timerHUD;
+
     private float timerNum;
-    public bool levelCompleted; // Return true if the player survives after the timer hits zero, and false if not.
+    private float startingTime;
+
+    private bool gameStopped = false;
+
+    // ==========================================
+    // PUBLIC STATE
+    // ==========================================
+
+    public bool levelCompleted = false;
+
+    public bool GameStopped
+    {
+        get { return gameStopped; }
+    }
+
+    // ==========================================
+    // START
+    // ==========================================
 
     void Start()
     {
-        tiles = FindObjectsOfType<Tile>();
-        player = FindObjectOfType<PlayerMovement>();
-        timerNum = Random.Range(30, 61);
-        updateLives(player.lives);
-        updateTimer(timerNum);
+        RefreshTiles();
+
+        player =
+            FindObjectOfType<PlayerMovement>();
+
+        timerNum =
+            Random.Range(
+                minimumGameTime,
+                maximumGameTime
+            );
+
+        startingTime = timerNum;
+
         levelCompleted = false;
-        StartCoroutine(WaveRoutine());
+
+        if (player != null)
+        {
+            UpdateLives(player.lives);
+        }
+
+        UpdateTimer(timerNum);
+
+        StartCoroutine(
+            WaveRoutine()
+        );
     }
 
-    private void FixedUpdate()
+    // ==========================================
+    // TIMER
+    // ==========================================
+
+    void Update()
     {
-        timerNum -= Time.deltaTime;
-        updateTimer(timerNum);
-        if (timerNum <= 0)
+        if (gameStopped)
+            return;
+
+        if (!levelCompleted)
         {
-            updateTimer(0);
-            levelCompleted = true;
+            timerNum -= Time.deltaTime;
+
+            if (timerNum <= 0f)
+            {
+                timerNum = 0f;
+                levelCompleted = true;
+
+                Debug.Log(
+                    "=============================="
+                );
+
+                Debug.Log(
+                    "SURVIVAL COMPLETE!"
+                );
+
+                Debug.Log(
+                    "GOLD TILE CAN NOW APPEAR!"
+                );
+
+                Debug.Log(
+                    "=============================="
+                );
+            }
+
+            UpdateTimer(timerNum);
         }
     }
 
@@ -57,36 +157,69 @@ public class RedWaveManager : MonoBehaviour
 
     IEnumerator WaveRoutine()
     {
-        while (true)
-        {
-            // Wait before creating the next wave
-            yield return new WaitForSeconds(waveInterval);
+        // Give player a moment before
+        // the first warning.
+        yield return new WaitForSeconds(0.5f);
 
+        while (!gameStopped)
+        {
             playerHitThisWave = false;
 
-            CreateWave();
+            // Decide row / column and
+            // how many waves.
+            CreateWaves();
 
-            yield return StartCoroutine(FlashWarningRoutine());
+            // Orange warning
+            yield return StartCoroutine(
+                FlashWarningRoutine()
+            );
 
-            yield return StartCoroutine(SweepWave());
+            if (gameStopped)
+                yield break;
 
-            // Keep the complete wave visible
-            yield return new WaitForSeconds(waveDuration);
+            // Red attack
+            yield return StartCoroutine(
+                SweepWave()
+            );
+
+            if (gameStopped)
+                yield break;
+
+            // Red remains briefly
+            yield return new WaitForSeconds(
+                waveDuration
+            );
 
             ClearWave();
+
+            // Very short break before
+            // next warning.
+            yield return new WaitForSeconds(
+                waveInterval
+            );
         }
     }
 
     // ==========================================
-    // CREATE WAVE BASED ON PLAYER POSITION
+    // CREATE WAVES
     // ==========================================
 
-    void CreateWave()
+    void CreateWaves()
     {
         ClearWave();
+        RefreshTiles();
 
         if (player == null)
             return;
+
+        currentWaveIndices.Clear();
+
+        // Randomly horizontal or vertical
+        isRowWave =
+            Random.value > 0.5f;
+
+        int waveCount =
+            GetCurrentWaveCount();
 
         int playerX =
             Mathf.RoundToInt(
@@ -98,152 +231,202 @@ public class RedWaveManager : MonoBehaviour
                 player.transform.position.z
             );
 
-        // ==========================================
-        // RANDOMLY CHOOSE ROW OR COLUMN
-        // ==========================================
+        int playerIndex =
+            isRowWave
+                ? playerZ
+                : playerX;
 
-        isRowWave = Random.value > 0.5f;
+        List<int> possibleIndices =
+            new List<int>();
 
-        // ==========================================
-        // ROW WAVE
-        // ==========================================
-
-        if (isRowWave)
+        for (int i = 0; i < gridSize; i++)
         {
-            List<int> possibleRows =
-                new List<int>();
-
-            for (int row = 0; row < 5; row++)
+            // Don't initially create a wave
+            // directly on the player's lane.
+            if (i != playerIndex)
             {
-                // Never create the wave directly
-                // on the player's current row
-                if (row != playerZ)
-                {
-                    possibleRows.Add(row);
-                }
+                possibleIndices.Add(i);
             }
-
-            // Put closest rows first
-            possibleRows.Sort(
-                (a, b) =>
-                    Mathf.Abs(a - playerZ)
-                    .CompareTo(
-                        Mathf.Abs(b - playerZ)
-                    )
-            );
-
-            // Choose one of the closest two
-            int choices =
-                Mathf.Min(
-                    2,
-                    possibleRows.Count
-                );
-
-            currentWaveIndex =
-                possibleRows[
-                    Random.Range(0, choices)
-                ];
-
-            Debug.Log(
-                "=============================="
-            );
-
-            Debug.Log(
-                "RED ROW WAVE"
-            );
-
-            Debug.Log(
-                "Wave Row: " +
-                (currentWaveIndex + 1)
-            );
-
-            Debug.Log(
-                "Player Position: (" +
-                (playerX + 1) +
-                "," +
-                (playerZ + 1) +
-                ")"
-            );
-
-            Debug.Log(
-                "=============================="
-            );
         }
 
         // ==========================================
-        // COLUMN WAVE
+        // SHUFFLE POSSIBLE LANES
         // ==========================================
 
-        else
+        for (
+            int i = 0;
+            i < possibleIndices.Count;
+            i++)
         {
-            List<int> possibleColumns =
-                new List<int>();
-
-            for (int column = 0; column < 5; column++)
-            {
-                // Never create the wave directly
-                // on the player's current column
-                if (column != playerX)
-                {
-                    possibleColumns.Add(column);
-                }
-            }
-
-            // Put closest columns first
-            possibleColumns.Sort(
-                (a, b) =>
-                    Mathf.Abs(a - playerX)
-                    .CompareTo(
-                        Mathf.Abs(b - playerX)
-                    )
-            );
-
-            // Choose one of the closest two
-            int choices =
-                Mathf.Min(
-                    2,
-                    possibleColumns.Count
+            int randomIndex =
+                Random.Range(
+                    i,
+                    possibleIndices.Count
                 );
 
-            currentWaveIndex =
-                possibleColumns[
-                    Random.Range(0, choices)
-                ];
+            int temp =
+                possibleIndices[i];
 
-            Debug.Log(
-                "=============================="
+            possibleIndices[i] =
+                possibleIndices[randomIndex];
+
+            possibleIndices[randomIndex] =
+                temp;
+        }
+
+        waveCount =
+            Mathf.Min(
+                waveCount,
+                possibleIndices.Count
             );
 
-            Debug.Log(
-                "RED COLUMN WAVE"
+        for (int i = 0; i < waveCount; i++)
+        {
+            currentWaveIndices.Add(
+                possibleIndices[i]
+            );
+        }
+
+        Debug.Log(
+            "=============================="
+        );
+
+        Debug.Log(
+            isRowWave
+                ? "RED ROW WAVES"
+                : "RED COLUMN WAVES"
+        );
+
+        Debug.Log(
+            "Wave Count: " +
+            currentWaveIndices.Count
+        );
+
+        Debug.Log(
+            "=============================="
+        );
+    }
+
+    // ==========================================
+    // DIFFICULTY
+    // ==========================================
+
+    int GetCurrentWaveCount()
+    {
+        if (startingTime <= 0f)
+            return 1;
+
+        float progress =
+            1f -
+            (
+                timerNum /
+                startingTime
             );
 
-            Debug.Log(
-                "Wave Column: " +
-                (currentWaveIndex + 1)
-            );
+        // ==========================================
+        // FIRST THIRD
+        // 1 RED WAVE
+        // ==========================================
 
-            Debug.Log(
-                "Player Position: (" +
-                (playerX + 1) +
-                "," +
-                (playerZ + 1) +
-                ")"
-            );
+        if (progress < 0.33f)
+        {
+            return 1;
+        }
 
-            Debug.Log(
-                "=============================="
-            );
+        // ==========================================
+        // SECOND THIRD
+        // 2 RED WAVES
+        // ==========================================
+
+        if (progress < 0.66f)
+        {
+            return 2;
+        }
+
+        // ==========================================
+        // FINAL THIRD
+        // 3 RED WAVES
+        // ==========================================
+
+        return 3;
+    }
+
+    // ==========================================
+    // ORANGE WARNING
+    // ==========================================
+
+    IEnumerator FlashWarningRoutine()
+    {
+        RefreshTiles();
+
+        foreach (Tile tile in tiles)
+        {
+            // ======================================
+            // PROTECT GREEN AND GOLD
+            // ======================================
+
+            if (tile.tileType ==
+                    Tile.TileType.Target ||
+                tile.tileType ==
+                    Tile.TileType.Gold)
+            {
+                continue;
+            }
+
+            int tileRow =
+                Mathf.RoundToInt(
+                    tile.transform.position.z
+                );
+
+            int tileColumn =
+                Mathf.RoundToInt(
+                    tile.transform.position.x
+                );
+
+            int lane =
+                isRowWave
+                    ? tileRow
+                    : tileColumn;
+
+            if (
+                currentWaveIndices.Contains(
+                    lane
+                ))
+            {
+                Renderer renderer =
+                    tile.GetComponent<Renderer>();
+
+                if (renderer != null)
+                {
+                    renderer.material.color =
+                        Color.orange;
+                }
+            }
+        }
+
+        yield return new WaitForSeconds(
+            warningDuration
+        );
+
+        // Restore original tile colors
+        foreach (Tile tile in tiles)
+        {
+            tile.UpdateColor();
         }
     }
 
     // ==========================================
-    // SWEEP WAVE ACROSS 5 TILES
+    // RED SWEEP
     // ==========================================
 
     IEnumerator SweepWave()
     {
-        for (int step = 0; step < 5; step++)
+        RefreshTiles();
+
+        for (
+            int step = 0;
+            step < gridSize;
+            step++)
         {
             foreach (Tile tile in tiles)
             {
@@ -257,39 +440,47 @@ public class RedWaveManager : MonoBehaviour
                         tile.transform.position.x
                     );
 
-                bool isWaveTile = false;
+                int lane =
+                    isRowWave
+                        ? tileRow
+                        : tileColumn;
 
-                // ROW
-                if (isRowWave)
-                {
-                    isWaveTile =
-                        tileRow == currentWaveIndex &&
-                        tileColumn == step;
-                }
+                int stepPosition =
+                    isRowWave
+                        ? tileColumn
+                        : tileRow;
 
-                // COLUMN
-                else
-                {
-                    isWaveTile =
-                        tileColumn == currentWaveIndex &&
-                        tileRow == step;
-                }
+                bool isWaveTile =
+                    currentWaveIndices.Contains(
+                        lane
+                    ) &&
+                    stepPosition == step;
 
                 if (isWaveTile)
                 {
-                    if (tile.tileType != Tile.TileType.Gold)
+                    // ==================================
+                    // GREEN AND GOLD ARE PROTECTED
+                    // ==================================
+
+                    if (tile.tileType !=
+                            Tile.TileType.Target &&
+                        tile.tileType !=
+                            Tile.TileType.Gold)
                     {
-                        tile.GetComponent<Renderer>().material.color =
-                            Color.red;
+                        Renderer renderer =
+                            tile.GetComponent<Renderer>();
+
+                        if (renderer != null)
+                        {
+                            renderer.material.color =
+                                Color.red;
+                        }
                     }
                 }
             }
 
-            // ==========================================
-            // CHECK PLAYER WHILE WAVE IS APPEARING
-            // ==========================================
-
-            CheckPlayer();
+            // Check if the player gets hit
+            CheckPlayer(step);
 
             yield return new WaitForSeconds(
                 tileDelay
@@ -298,16 +489,14 @@ public class RedWaveManager : MonoBehaviour
     }
 
     // ==========================================
-    // CHECK PLAYER POSITION
+    // CHECK PLAYER
     // ==========================================
 
-    void CheckPlayer()
+    void CheckPlayer(int currentStep)
     {
         if (player == null)
             return;
 
-        // Don't remove multiple lives from
-        // the same wave
         if (playerHitThisWave)
             return;
 
@@ -321,29 +510,57 @@ public class RedWaveManager : MonoBehaviour
                 player.transform.position.z
             );
 
-        bool playerOnWave = false;
+        int playerLane =
+            isRowWave
+                ? playerZ
+                : playerX;
 
-        // ==========================================
-        // ROW WAVE
-        // ==========================================
+        int playerStepPosition =
+            isRowWave
+                ? playerX
+                : playerZ;
 
-        if (isRowWave)
+        // Player is not on one of
+        // the active red lanes.
+        if (
+            !currentWaveIndices.Contains(
+                playerLane
+            ))
         {
-            if (playerZ == currentWaveIndex)
-            {
-                playerOnWave = true;
-            }
+            return;
+        }
+
+        // IMPORTANT:
+        // Only hit the player when the actual
+        // red sweep reaches their tile.
+        if (playerStepPosition != currentStep)
+        {
+            return;
         }
 
         // ==========================================
-        // COLUMN WAVE
+        // CHECK PLAYER TILE
         // ==========================================
 
-        else
+        Tile playerTile =
+            GetTileAt(
+                playerX,
+                playerZ
+            );
+
+        if (playerTile != null)
         {
-            if (playerX == currentWaveIndex)
+            // ======================================
+            // GREEN = SAFE
+            // GOLD = SAFE
+            // ======================================
+
+            if (playerTile.tileType ==
+                    Tile.TileType.Target ||
+                playerTile.tileType ==
+                    Tile.TileType.Gold)
             {
-                playerOnWave = true;
+                return;
             }
         }
 
@@ -351,32 +568,75 @@ public class RedWaveManager : MonoBehaviour
         // PLAYER HIT
         // ==========================================
 
-        if (playerOnWave)
+        playerHitThisWave = true;
+
+        player.lives--;
+
+        UpdateLives(
+            player.lives
+        );
+
+        Debug.Log(
+            "=============================="
+        );
+
+        Debug.Log(
+            "RED WAVE HIT!"
+        );
+
+        Debug.Log(
+            "Lives remaining: " +
+            player.lives
+        );
+
+        Debug.Log(
+            "=============================="
+        );
+
+        // ==========================================
+        // GAME OVER
+        // ==========================================
+
+        if (player.lives <= 0)
         {
-            playerHitThisWave = true;
+            StopGame();
 
-            player.lives--;
-            updateLives(player.lives);
+            player.GameOver();
+        }
+    }
 
-            Debug.Log(
-                "RED WAVE HIT!"
-            );
+    // ==========================================
+    // FIND TILE AT GRID POSITION
+    // ==========================================
 
-            Debug.Log(
-                "Lives remaining: " +
-                player.lives
-            );
+    Tile GetTileAt(
+        int x,
+        int z)
+    {
+        if (tiles == null)
+            return null;
 
-            // If the player gets a game over, pause the game for some seconds, then reload the scene.
-            if (player.lives <= 0)
-            {
-                Debug.Log(
-                    "GAME OVER!"
+        foreach (Tile tile in tiles)
+        {
+            int tileX =
+                Mathf.RoundToInt(
+                    tile.transform.position.x
                 );
-                StartCoroutine(WaitRoutine(10));
-                SceneManager.LoadScene("SampleScene");
+
+            int tileZ =
+                Mathf.RoundToInt(
+                    tile.transform.position.z
+                );
+
+            if (
+                tileX == x &&
+                tileZ == z)
+            {
+                return tile;
             }
         }
+
+        return null;
     }
 
     // ==========================================
@@ -385,6 +645,8 @@ public class RedWaveManager : MonoBehaviour
 
     void ClearWave()
     {
+        RefreshTiles();
+
         if (tiles == null)
             return;
 
@@ -394,62 +656,52 @@ public class RedWaveManager : MonoBehaviour
         }
     }
 
-    private void updateLives(int num)
+    // ==========================================
+    // STOP GAME
+    // ==========================================
+
+    public void StopGame()
     {
-        livesHUD.text = "Lives: " + num;
+        if (gameStopped)
+            return;
+
+        gameStopped = true;
+
+        StopAllCoroutines();
+
+        ClearWave();
     }
 
-    private void updateTimer(float num)
-    {
-        timerHUD.text = "Timer: " + num;
-    }
+    // ==========================================
+    // UI
+    // ==========================================
 
-    private IEnumerator WaitRoutine(int seconds)
+    void UpdateLives(int num)
     {
-        yield return new WaitForSeconds(seconds);
-    }
-
-    private IEnumerator FlashWarningRoutine()
-    {
-        for (int step = 0; step < 5; step++)
+        if (livesHUD != null)
         {
-            foreach (Tile tile in tiles)
-            {
-                int tileRow =
-                    Mathf.RoundToInt(
-                        tile.transform.position.z
-                    );
-
-                int tileColumn =
-                    Mathf.RoundToInt(
-                        tile.transform.position.x
-                    );
-
-                bool isWaveTile = false;
-
-                // ROW
-                if (isRowWave)
-                {
-                    isWaveTile =
-                        tileRow == currentWaveIndex &&
-                        tileColumn == step;
-                }
-
-                // COLUMN
-                else
-                {
-                    isWaveTile =
-                        tileColumn == currentWaveIndex &&
-                        tileRow == step;
-                }
-
-                if (isWaveTile)
-                {
-                    tile.GetComponent<Renderer>().material.color =
-                        Color.orange;
-                }
-            }
+            livesHUD.text =
+                "Lives: " + num;
         }
-        yield return new WaitForSeconds(2.5f);
+    }
+
+    void UpdateTimer(float num)
+    {
+        if (timerHUD != null)
+        {
+            timerHUD.text =
+                "Timer: " +
+                Mathf.CeilToInt(num);
+        }
+    }
+
+    // ==========================================
+    // REFRESH TILES
+    // ==========================================
+
+    void RefreshTiles()
+    {
+        tiles =
+            FindObjectsOfType<Tile>();
     }
 }

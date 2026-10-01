@@ -5,30 +5,37 @@ using System.Collections;
 
 public class PlayerMovement : MonoBehaviour
 {
+    [Header("Movement")]
     public float moveSpeed = 5f;
     public float jumpHeight = 1.2f;
 
+    [Header("Player")]
     public int lives = 3;
     public int score = 0;
 
+    [Header("Grid")]
+    public int gridSize = 9;
+
     private bool canMove = true;
     private bool gameWon = false;
+    private bool gameOver = false;
 
-    private RedWaveManager isWaveOver;
+    private RedWaveManager redWaveManager;
 
-    private void Start()
+    void Start()
     {
-        isWaveOver = FindObjectOfType<RedWaveManager>();
+        redWaveManager =
+            FindObjectOfType<RedWaveManager>();
     }
 
     void Update()
     {
-        if (!canMove || gameWon)
+        if (!canMove || gameWon || gameOver)
             return;
 
         // ==========================================
         // JUMP
-        // Direction + SPACE = 2 TILES
+        // Direction + Space = 2 Tiles
         // ==========================================
 
         if (Keyboard.current.spaceKey.wasPressedThisFrame)
@@ -61,13 +68,11 @@ public class PlayerMovement : MonoBehaviour
                 return;
             }
 
-            // Space alone does nothing
             return;
         }
 
         // ==========================================
         // NORMAL MOVEMENT
-        // Direction only = 1 TILE
         // ==========================================
 
         if (Keyboard.current.wKey.wasPressedThisFrame ||
@@ -99,83 +104,49 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    // ==========================================
-    // TRY MOVE
-    // ==========================================
-
     void TryMove(
         Vector3 direction,
         int tiles,
-        bool isJump
-    )
+        bool isJump)
     {
-        Vector3 startPosition = transform.position;
+        Vector3 startPosition =
+            transform.position;
 
         Vector3 targetPosition =
             startPosition + direction * tiles;
 
         // ==========================================
-        // GRID BOUNDARIES
+        // 9x9 GRID BOUNDARIES
         // ==========================================
 
         if (targetPosition.x < 0 ||
-            targetPosition.x > 4 ||
+            targetPosition.x > gridSize - 1 ||
             targetPosition.z < 0 ||
-            targetPosition.z > 4)
+            targetPosition.z > gridSize - 1)
         {
-            Debug.Log("CANNOT MOVE OUTSIDE THE GRID!");
+            Debug.Log(
+                "CANNOT MOVE OUTSIDE THE GRID!"
+            );
+
             return;
         }
 
-        // ==========================================
-        // DEBUG
-        // ==========================================
-
         if (isJump)
         {
-            Debug.Log(
-                "JUMP: (" +
-                Mathf.RoundToInt(startPosition.x) +
-                "," +
-                Mathf.RoundToInt(startPosition.z) +
-                ") → (" +
-                Mathf.RoundToInt(targetPosition.x) +
-                "," +
-                Mathf.RoundToInt(targetPosition.z) +
-                ")"
-            );
-
             StartCoroutine(
                 JumpToPosition(targetPosition)
             );
         }
         else
         {
-            Debug.Log(
-                "MOVE: (" +
-                Mathf.RoundToInt(startPosition.x) +
-                "," +
-                Mathf.RoundToInt(startPosition.z) +
-                ") → (" +
-                Mathf.RoundToInt(targetPosition.x) +
-                "," +
-                Mathf.RoundToInt(targetPosition.z) +
-                ")"
-            );
-
             StartCoroutine(
                 MoveToPosition(targetPosition)
             );
         }
     }
 
-    // ==========================================
-    // NORMAL MOVEMENT
-    // ==========================================
-
     IEnumerator MoveToPosition(
-        Vector3 targetPosition
-    )
+        Vector3 targetPosition)
     {
         canMove = false;
 
@@ -215,19 +186,13 @@ public class PlayerMovement : MonoBehaviour
         transform.position =
             targetPosition;
 
-        // Only check the landing tile
         CheckForGoal();
 
         canMove = true;
     }
 
-    // ==========================================
-    // JUMP MOVEMENT
-    // ==========================================
-
     IEnumerator JumpToPosition(
-        Vector3 targetPosition
-    )
+        Vector3 targetPosition)
     {
         canMove = false;
 
@@ -267,43 +232,40 @@ public class PlayerMovement : MonoBehaviour
 
             position.y += arc;
 
-            transform.position =
-                position;
+            transform.position = position;
 
             yield return null;
         }
 
-        // ==========================================
-        // LAND DIRECTLY ON TARGET TILE
-        // ==========================================
-
         transform.position =
             targetPosition;
 
-        // Only landing position matters
         CheckForGoal();
 
         canMove = true;
     }
 
     // ==========================================
-    // GOAL
+    // GOLD TILE CHECK
     // ==========================================
 
     void CheckForGoal()
     {
+        if (redWaveManager == null)
+            return;
+
+        if (!redWaveManager.levelCompleted)
+            return;
+
         int playerX =
-            Mathf.RoundToInt(transform.position.x);
+            Mathf.RoundToInt(
+                transform.position.x
+            );
 
         int playerZ =
-            Mathf.RoundToInt(transform.position.z);
-
-        // Player cannot win until the level is complete
-        if (isWaveOver == null ||
-            !isWaveOver.levelCompleted)
-        {
-            return;
-        }
+            Mathf.RoundToInt(
+                transform.position.z
+            );
 
         Tile[] allTiles =
             FindObjectsOfType<Tile>();
@@ -321,14 +283,11 @@ public class PlayerMovement : MonoBehaviour
                 );
 
             if (tileX == playerX &&
-                tileZ == playerZ)
+                tileZ == playerZ &&
+                tile.tileType ==
+                Tile.TileType.Gold)
             {
-                if (tile.tileType ==
-                    Tile.TileType.Gold)
-                {
-                    WinGame();
-                }
-
+                WinGame();
                 return;
             }
         }
@@ -340,28 +299,69 @@ public class PlayerMovement : MonoBehaviour
 
     public void WinGame()
     {
-        if (gameWon)
+        if (gameWon || gameOver)
             return;
 
         gameWon = true;
         canMove = false;
 
-        Debug.Log("==============================");
-        Debug.Log("          YOU WIN!");
-        Debug.Log("       GOLD TILE REACHED!");
-        Debug.Log("==============================");
+        Debug.Log(
+            "=============================="
+        );
 
-        StartCoroutine(WinRoutine());
+        Debug.Log("YOU WIN!");
+
+        Debug.Log(
+            "GOLD TILE REACHED!"
+        );
+
+        Debug.Log(
+            "=============================="
+        );
+
+        if (redWaveManager != null)
+        {
+            redWaveManager.StopGame();
+        }
+
+        StartCoroutine(
+            RestartAfterDelay()
+        );
     }
 
     // ==========================================
-    // RESTART AFTER WIN
+    // GAME OVER
     // ==========================================
 
-    private IEnumerator WinRoutine()
+    public void GameOver()
     {
-        yield return new WaitForSeconds(10f);
+        if (gameOver || gameWon)
+            return;
 
-        SceneManager.LoadScene("SampleScene");
+        gameOver = true;
+        canMove = false;
+
+        Debug.Log(
+            "=============================="
+        );
+
+        Debug.Log("GAME OVER!");
+
+        Debug.Log(
+            "=============================="
+        );
+
+        StartCoroutine(
+            RestartAfterDelay()
+        );
+    }
+
+    IEnumerator RestartAfterDelay()
+    {
+        yield return new WaitForSeconds(3f);
+
+        SceneManager.LoadScene(
+            SceneManager.GetActiveScene().name
+        );
     }
 }
