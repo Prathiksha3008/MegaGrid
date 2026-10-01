@@ -53,7 +53,7 @@ public class GreenTileManager : MonoBehaviour
                 SpawnGreenTile();
 
                 yield return
-                    new WaitForSeconds(0.1f);
+                    new WaitForSeconds(1.0f);
             }
 
             yield return
@@ -96,7 +96,7 @@ public class GreenTileManager : MonoBehaviour
                 )
             ];
 
-        selectedTile.SetTileType(
+        selectedTile.UpdateColor(
             Tile.TileType.Target
         );
 
@@ -123,7 +123,7 @@ public class GreenTileManager : MonoBehaviour
             tile.tileType ==
             Tile.TileType.Target)
         {
-            tile.SetTileType(
+            tile.UpdateColor(
                 Tile.TileType.Normal
             );
         }

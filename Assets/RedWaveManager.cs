@@ -64,22 +64,6 @@ public class RedWaveManager : MonoBehaviour
     private bool playerHitThisWave = false;
     private bool gameStarted;
 
-    void Start()
-    {
-        Time.timeScale = 0f;
-        tiles = FindObjectsOfType<Tile>();
-        player = FindObjectOfType<PlayerMovement>();
-    }
-
-    public void BeginGame()
-    {
-        if (gameStarted)
-            return;
-
-        gameStarted = true;
-        Time.timeScale = 1f;
-        StartCoroutine(WaveRoutine());
-
     private float timerNum;
     private float startingTime;
 
@@ -96,16 +80,16 @@ public class RedWaveManager : MonoBehaviour
         get { return gameStopped; }
     }
 
+
     // ==========================================
     // START
     // ==========================================
-
     void Start()
     {
+        Time.timeScale = 0f;
+        tiles = FindObjectsOfType<Tile>();
+        player = FindObjectOfType<PlayerMovement>();
         RefreshTiles();
-
-        player =
-            FindObjectOfType<PlayerMovement>();
 
         timerNum =
             Random.Range(
@@ -127,6 +111,16 @@ public class RedWaveManager : MonoBehaviour
         StartCoroutine(
             WaveRoutine()
         );
+    }
+
+    public void BeginGame()
+    {
+        if (gameStarted)
+            return;
+
+        gameStarted = true;
+        Time.timeScale = 1f;
+        StartCoroutine(WaveRoutine());
     }
 
     // ==========================================
@@ -428,7 +422,7 @@ public class RedWaveManager : MonoBehaviour
         // Restore original tile colors
         foreach (Tile tile in tiles)
         {
-            tile.UpdateColor();
+            tile.UpdateColor(Tile.TileType.Normal);
         }
     }
 
@@ -669,7 +663,7 @@ public class RedWaveManager : MonoBehaviour
 
         foreach (Tile tile in tiles)
         {
-            tile.UpdateColor();
+            tile.UpdateColor(Tile.TileType.Normal);
         }
     }
 

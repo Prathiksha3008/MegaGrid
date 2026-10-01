@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using System.Collections;
 
 public class PlayerMovement : MonoBehaviour
@@ -19,6 +20,7 @@ public class PlayerMovement : MonoBehaviour
     private bool gameWon = false;
     private bool gameOver = false;
 
+    private RedWaveManager redWaveManager;
     public void BeginGame()
     {
         gameStarted = true;

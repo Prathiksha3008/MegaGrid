@@ -76,7 +76,7 @@ public class GoldenTileManager : MonoBehaviour
         goldenTile =
             availableTiles[randomIndex];
 
-        goldenTile.SetTileType(
+        goldenTile.UpdateColor(
             Tile.TileType.Gold
         );
 

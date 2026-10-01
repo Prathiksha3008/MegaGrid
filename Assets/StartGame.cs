@@ -38,8 +38,8 @@ public class StartGame : MonoBehaviour
         Camera gameCamera = Camera.main;
         if (gameCamera != null)
         {
-            gameCamera.transform.position = new Vector3(2f, 8f, 2f);
-            gameCamera.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+            gameCamera.transform.position = new Vector3(5f, 6f, 2f);
+            gameCamera.transform.rotation = Quaternion.Euler(72.5f, 0f, 0f);
             gameCamera.orthographic = true;
             gameCamera.orthographicSize = 4.3f;
         }

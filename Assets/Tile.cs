@@ -6,7 +6,9 @@ public class Tile : MonoBehaviour
     {
         Normal,
         Hazard,
-        Target
+        Target,
+        Warning,
+        Gold
     }
 
     public TileType tileType = TileType.Normal;
@@ -16,16 +18,10 @@ public class Tile : MonoBehaviour
     void Start()
     {
         tileRenderer = GetComponent<Renderer>();
-        UpdateColor();
+        UpdateColor(tileType);
     }
 
-    void UpdateColor()
-    {
-        tileType = newType;
-        UpdateColor();
-    }
-
-    public void UpdateColor()
+    public void UpdateColor(TileType tileType)
     {
         if (tileRenderer == null)
         {
@@ -64,7 +60,7 @@ public class Tile : MonoBehaviour
             case TileType.Warning:
 
                 tileRenderer.material.color =
-                    Color.orange;
+                    Color.yellow;
 
                 break;
 
