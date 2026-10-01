@@ -1,13 +1,11 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.SceneManagement;
 using System.Collections;
 
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Movement")]
     public float moveSpeed = 5f;
-    public float jumpHeight = 1.2f;
 
     [Header("Player")]
     public int lives = 3;
@@ -17,103 +15,72 @@ public class PlayerMovement : MonoBehaviour
     public int gridSize = 9;
 
     private bool canMove = true;
+    private bool gameStarted = false;
     private bool gameWon = false;
     private bool gameOver = false;
 
-    private RedWaveManager redWaveManager;
-
-    void Start()
+    public void BeginGame()
     {
-        redWaveManager =
-            FindObjectOfType<RedWaveManager>();
+        gameStarted = true;
     }
 
     void Update()
     {
-        if (!canMove || gameWon || gameOver)
+        if (!gameStarted || !canMove || gameWon || gameOver)
             return;
 
         // ==========================================
-        // JUMP
-        // Direction + Space = 2 Tiles
+        // FORWARD
         // ==========================================
 
-        if (Keyboard.current.spaceKey.wasPressedThisFrame)
+        if (Keyboard.current.upArrowKey.wasPressedThisFrame)
         {
-            if (Keyboard.current.wKey.isPressed ||
-                Keyboard.current.upArrowKey.isPressed)
-            {
-                TryMove(Vector3.forward, 2, true);
-                return;
-            }
-
-            if (Keyboard.current.sKey.isPressed ||
-                Keyboard.current.downArrowKey.isPressed)
-            {
-                TryMove(Vector3.back, 2, true);
-                return;
-            }
-
-            if (Keyboard.current.aKey.isPressed ||
-                Keyboard.current.leftArrowKey.isPressed)
-            {
-                TryMove(Vector3.left, 2, true);
-                return;
-            }
-
-            if (Keyboard.current.dKey.isPressed ||
-                Keyboard.current.rightArrowKey.isPressed)
-            {
-                TryMove(Vector3.right, 2, true);
-                return;
-            }
-
+            TryMove(Vector3.forward);
             return;
         }
 
         // ==========================================
-        // NORMAL MOVEMENT
+        // BACK
         // ==========================================
 
-        if (Keyboard.current.wKey.wasPressedThisFrame ||
-            Keyboard.current.upArrowKey.wasPressedThisFrame)
+        if (Keyboard.current.downArrowKey.wasPressedThisFrame)
         {
-            TryMove(Vector3.forward, 1, false);
+            TryMove(Vector3.back);
             return;
         }
 
-        if (Keyboard.current.sKey.wasPressedThisFrame ||
-            Keyboard.current.downArrowKey.wasPressedThisFrame)
+        // ==========================================
+        // LEFT
+        // ==========================================
+
+        if (Keyboard.current.leftArrowKey.wasPressedThisFrame)
         {
-            TryMove(Vector3.back, 1, false);
+            TryMove(Vector3.left);
             return;
         }
 
-        if (Keyboard.current.aKey.wasPressedThisFrame ||
-            Keyboard.current.leftArrowKey.wasPressedThisFrame)
-        {
-            TryMove(Vector3.left, 1, false);
-            return;
-        }
+        // ==========================================
+        // RIGHT
+        // ==========================================
 
-        if (Keyboard.current.dKey.wasPressedThisFrame ||
-            Keyboard.current.rightArrowKey.wasPressedThisFrame)
+        if (Keyboard.current.rightArrowKey.wasPressedThisFrame)
         {
-            TryMove(Vector3.right, 1, false);
+            TryMove(Vector3.right);
             return;
         }
     }
 
-    void TryMove(
-        Vector3 direction,
-        int tiles,
-        bool isJump)
+    // ==========================================
+    // MOVE ONE TILE
+    // ==========================================
+
+    void TryMove(Vector3 direction)
     {
         Vector3 startPosition =
             transform.position;
 
         Vector3 targetPosition =
-            startPosition + direction * tiles;
+            startPosition + direction;
 
         // ==========================================
         // 9x9 GRID BOUNDARIES
@@ -131,19 +98,14 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
-        if (isJump)
-        {
-            StartCoroutine(
-                JumpToPosition(targetPosition)
-            );
-        }
-        else
-        {
-            StartCoroutine(
-                MoveToPosition(targetPosition)
-            );
-        }
+        StartCoroutine(
+            MoveToPosition(targetPosition)
+        );
     }
+
+    // ==========================================
+    // MOVE ANIMATION
+    // ==========================================
 
     IEnumerator MoveToPosition(
         Vector3 targetPosition)
@@ -191,62 +153,8 @@ public class PlayerMovement : MonoBehaviour
         canMove = true;
     }
 
-    IEnumerator JumpToPosition(
-        Vector3 targetPosition)
-    {
-        canMove = false;
-
-        Vector3 startPosition =
-            transform.position;
-
-        float distance =
-            Vector3.Distance(
-                startPosition,
-                targetPosition
-            );
-
-        float duration =
-            distance / moveSpeed;
-
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-
-            float t =
-                Mathf.Clamp01(
-                    elapsed / duration
-                );
-
-            Vector3 position =
-                Vector3.Lerp(
-                    startPosition,
-                    targetPosition,
-                    t
-                );
-
-            float arc =
-                Mathf.Sin(t * Mathf.PI) *
-                jumpHeight;
-
-            position.y += arc;
-
-            transform.position = position;
-
-            yield return null;
-        }
-
-        transform.position =
-            targetPosition;
-
-        CheckForGoal();
-
-        canMove = true;
-    }
-
     // ==========================================
-    // GOLD TILE CHECK
+    // CHECK GOAL
     // ==========================================
 
     void CheckForGoal()
@@ -297,7 +205,7 @@ public class PlayerMovement : MonoBehaviour
     // WIN
     // ==========================================
 
-    public void WinGame()
+    void WinGame()
     {
         if (gameWon || gameOver)
             return;

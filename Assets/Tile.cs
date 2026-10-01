@@ -6,9 +6,7 @@ public class Tile : MonoBehaviour
     {
         Normal,
         Hazard,
-        Target,
-        Warning,
-        Gold
+        Target
     }
 
     public TileType tileType = TileType.Normal;
@@ -21,7 +19,7 @@ public class Tile : MonoBehaviour
         UpdateColor();
     }
 
-    public void SetTileType(TileType newType)
+    void UpdateColor()
     {
         tileType = newType;
         UpdateColor();

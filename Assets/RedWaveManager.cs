@@ -62,6 +62,23 @@ public class RedWaveManager : MonoBehaviour
 
     private bool isRowWave = true;
     private bool playerHitThisWave = false;
+    private bool gameStarted;
+
+    void Start()
+    {
+        Time.timeScale = 0f;
+        tiles = FindObjectsOfType<Tile>();
+        player = FindObjectOfType<PlayerMovement>();
+    }
+
+    public void BeginGame()
+    {
+        if (gameStarted)
+            return;
+
+        gameStarted = true;
+        Time.timeScale = 1f;
+        StartCoroutine(WaveRoutine());
 
     private float timerNum;
     private float startingTime;
