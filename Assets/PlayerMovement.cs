@@ -1,118 +1,80 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.SceneManagement;
 using System.Collections;
 
 public class PlayerMovement : MonoBehaviour
 {
     public float moveSpeed = 5f;
-    public float jumpHeight = 1.2f;
 
     public int lives = 3;
     public int score = 0;
 
     private bool canMove = true;
+    private bool gameStarted = false;
     private bool gameWon = false;
 
-    private RedWaveManager isWaveOver;
-
-    private void Start()
+    public void BeginGame()
     {
-        isWaveOver = FindObjectOfType<RedWaveManager>();
+        gameStarted = true;
     }
 
     void Update()
     {
-        if (!canMove || gameWon)
+        if (!gameStarted || !canMove || gameWon)
             return;
 
         // ==========================================
-        // JUMP
-        // Direction + SPACE = 2 TILES
+        // FORWARD
         // ==========================================
 
-        if (Keyboard.current.spaceKey.wasPressedThisFrame)
+        if (Keyboard.current.upArrowKey.wasPressedThisFrame)
         {
-            if (Keyboard.current.wKey.isPressed ||
-                Keyboard.current.upArrowKey.isPressed)
-            {
-                TryMove(Vector3.forward, 2, true);
-                return;
-            }
-
-            if (Keyboard.current.sKey.isPressed ||
-                Keyboard.current.downArrowKey.isPressed)
-            {
-                TryMove(Vector3.back, 2, true);
-                return;
-            }
-
-            if (Keyboard.current.aKey.isPressed ||
-                Keyboard.current.leftArrowKey.isPressed)
-            {
-                TryMove(Vector3.left, 2, true);
-                return;
-            }
-
-            if (Keyboard.current.dKey.isPressed ||
-                Keyboard.current.rightArrowKey.isPressed)
-            {
-                TryMove(Vector3.right, 2, true);
-                return;
-            }
-
-            // Space alone does nothing
+            TryMove(Vector3.forward);
             return;
         }
 
         // ==========================================
-        // NORMAL MOVEMENT
-        // Direction only = 1 TILE
+        // BACK
         // ==========================================
 
-        if (Keyboard.current.wKey.wasPressedThisFrame ||
-            Keyboard.current.upArrowKey.wasPressedThisFrame)
+        if (Keyboard.current.downArrowKey.wasPressedThisFrame)
         {
-            TryMove(Vector3.forward, 1, false);
+            TryMove(Vector3.back);
             return;
         }
 
-        if (Keyboard.current.sKey.wasPressedThisFrame ||
-            Keyboard.current.downArrowKey.wasPressedThisFrame)
+        // ==========================================
+        // LEFT
+        // ==========================================
+
+        if (Keyboard.current.leftArrowKey.wasPressedThisFrame)
         {
-            TryMove(Vector3.back, 1, false);
+            TryMove(Vector3.left);
             return;
         }
 
-        if (Keyboard.current.aKey.wasPressedThisFrame ||
-            Keyboard.current.leftArrowKey.wasPressedThisFrame)
-        {
-            TryMove(Vector3.left, 1, false);
-            return;
-        }
+        // ==========================================
+        // RIGHT
+        // ==========================================
 
-        if (Keyboard.current.dKey.wasPressedThisFrame ||
-            Keyboard.current.rightArrowKey.wasPressedThisFrame)
+        if (Keyboard.current.rightArrowKey.wasPressedThisFrame)
         {
-            TryMove(Vector3.right, 1, false);
+            TryMove(Vector3.right);
             return;
         }
     }
 
     // ==========================================
-    // TRY MOVE
+    // MOVE ONE TILE
     // ==========================================
 
-    void TryMove(
-        Vector3 direction,
-        int tiles,
-        bool isJump
-    )
+    void TryMove(Vector3 direction)
     {
-        Vector3 startPosition = transform.position;
+        Vector3 startPosition =
+            transform.position;
 
         Vector3 targetPosition =
-            startPosition + direction * tiles;
+            startPosition + direction;
 
         // ==========================================
         // GRID BOUNDARIES
@@ -123,54 +85,20 @@ public class PlayerMovement : MonoBehaviour
             targetPosition.z < 0 ||
             targetPosition.z > 4)
         {
-            Debug.Log("CANNOT MOVE OUTSIDE THE GRID!");
+            Debug.Log(
+                "CANNOT MOVE OUTSIDE THE GRID!"
+            );
+
             return;
         }
 
-        // ==========================================
-        // DEBUG
-        // ==========================================
-
-        if (isJump)
-        {
-            Debug.Log(
-                "JUMP: (" +
-                Mathf.RoundToInt(startPosition.x) +
-                "," +
-                Mathf.RoundToInt(startPosition.z) +
-                ") → (" +
-                Mathf.RoundToInt(targetPosition.x) +
-                "," +
-                Mathf.RoundToInt(targetPosition.z) +
-                ")"
-            );
-
-            StartCoroutine(
-                JumpToPosition(targetPosition)
-            );
-        }
-        else
-        {
-            Debug.Log(
-                "MOVE: (" +
-                Mathf.RoundToInt(startPosition.x) +
-                "," +
-                Mathf.RoundToInt(startPosition.z) +
-                ") → (" +
-                Mathf.RoundToInt(targetPosition.x) +
-                "," +
-                Mathf.RoundToInt(targetPosition.z) +
-                ")"
-            );
-
-            StartCoroutine(
-                MoveToPosition(targetPosition)
-            );
-        }
+        StartCoroutine(
+            MoveToPosition(targetPosition)
+        );
     }
 
     // ==========================================
-    // NORMAL MOVEMENT
+    // MOVE ANIMATION
     // ==========================================
 
     IEnumerator MoveToPosition(
@@ -215,122 +143,31 @@ public class PlayerMovement : MonoBehaviour
         transform.position =
             targetPosition;
 
-        // Only check the landing tile
         CheckForGoal();
 
         canMove = true;
     }
 
     // ==========================================
-    // JUMP MOVEMENT
-    // ==========================================
-
-    IEnumerator JumpToPosition(
-        Vector3 targetPosition
-    )
-    {
-        canMove = false;
-
-        Vector3 startPosition =
-            transform.position;
-
-        float distance =
-            Vector3.Distance(
-                startPosition,
-                targetPosition
-            );
-
-        float duration =
-            distance / moveSpeed;
-
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-
-            float t =
-                Mathf.Clamp01(
-                    elapsed / duration
-                );
-
-            Vector3 position =
-                Vector3.Lerp(
-                    startPosition,
-                    targetPosition,
-                    t
-                );
-
-            float arc =
-                Mathf.Sin(t * Mathf.PI) *
-                jumpHeight;
-
-            position.y += arc;
-
-            transform.position =
-                position;
-
-            yield return null;
-        }
-
-        // ==========================================
-        // LAND DIRECTLY ON TARGET TILE
-        // ==========================================
-
-        transform.position =
-            targetPosition;
-
-        // Only landing position matters
-        CheckForGoal();
-
-        canMove = true;
-    }
-
-    // ==========================================
-    // GOAL
+    // CHECK GOAL
     // ==========================================
 
     void CheckForGoal()
     {
         int playerX =
-            Mathf.RoundToInt(transform.position.x);
+            Mathf.RoundToInt(
+                transform.position.x
+            );
 
         int playerZ =
-            Mathf.RoundToInt(transform.position.z);
+            Mathf.RoundToInt(
+                transform.position.z
+            );
 
-        // Player cannot win until the level is complete
-        if (isWaveOver == null ||
-            !isWaveOver.levelCompleted)
+        if (playerX == 0 &&
+            playerZ == 4)
         {
-            return;
-        }
-
-        Tile[] allTiles =
-            FindObjectsOfType<Tile>();
-
-        foreach (Tile tile in allTiles)
-        {
-            int tileX =
-                Mathf.RoundToInt(
-                    tile.transform.position.x
-                );
-
-            int tileZ =
-                Mathf.RoundToInt(
-                    tile.transform.position.z
-                );
-
-            if (tileX == playerX &&
-                tileZ == playerZ)
-            {
-                if (tile.tileType ==
-                    Tile.TileType.Gold)
-                {
-                    WinGame();
-                }
-
-                return;
-            }
+            WinGame();
         }
     }
 
@@ -338,30 +175,24 @@ public class PlayerMovement : MonoBehaviour
     // WIN
     // ==========================================
 
-    public void WinGame()
+    void WinGame()
     {
-        if (gameWon)
-            return;
-
         gameWon = true;
-        canMove = false;
 
-        Debug.Log("==============================");
-        Debug.Log("          YOU WIN!");
-        Debug.Log("       GOLD TILE REACHED!");
-        Debug.Log("==============================");
+        Debug.Log(
+            "=============================="
+        );
 
-        StartCoroutine(WinRoutine());
-    }
+        Debug.Log(
+            "YOU WIN!"
+        );
 
-    // ==========================================
-    // RESTART AFTER WIN
-    // ==========================================
+        Debug.Log(
+            "GOAL REACHED!"
+        );
 
-    private IEnumerator WinRoutine()
-    {
-        yield return new WaitForSeconds(10f);
-
-        SceneManager.LoadScene("SampleScene");
+        Debug.Log(
+            "=============================="
+        );
     }
 }
