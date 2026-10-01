@@ -4,14 +4,20 @@ using System.Collections;
 
 public class PlayerMovement : MonoBehaviour
 {
+    [Header("Movement")]
     public float moveSpeed = 5f;
 
+    [Header("Player")]
     public int lives = 3;
     public int score = 0;
+
+    [Header("Grid")]
+    public int gridSize = 9;
 
     private bool canMove = true;
     private bool gameStarted = false;
     private bool gameWon = false;
+    private bool gameOver = false;
 
     public void BeginGame()
     {
@@ -20,7 +26,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        if (!gameStarted || !canMove || gameWon)
+        if (!gameStarted || !canMove || gameWon || gameOver)
             return;
 
         // ==========================================
@@ -77,13 +83,13 @@ public class PlayerMovement : MonoBehaviour
             startPosition + direction;
 
         // ==========================================
-        // GRID BOUNDARIES
+        // 9x9 GRID BOUNDARIES
         // ==========================================
 
         if (targetPosition.x < 0 ||
-            targetPosition.x > 4 ||
+            targetPosition.x > gridSize - 1 ||
             targetPosition.z < 0 ||
-            targetPosition.z > 4)
+            targetPosition.z > gridSize - 1)
         {
             Debug.Log(
                 "CANNOT MOVE OUTSIDE THE GRID!"
@@ -102,8 +108,7 @@ public class PlayerMovement : MonoBehaviour
     // ==========================================
 
     IEnumerator MoveToPosition(
-        Vector3 targetPosition
-    )
+        Vector3 targetPosition)
     {
         canMove = false;
 
@@ -154,6 +159,12 @@ public class PlayerMovement : MonoBehaviour
 
     void CheckForGoal()
     {
+        if (redWaveManager == null)
+            return;
+
+        if (!redWaveManager.levelCompleted)
+            return;
+
         int playerX =
             Mathf.RoundToInt(
                 transform.position.x
@@ -164,10 +175,29 @@ public class PlayerMovement : MonoBehaviour
                 transform.position.z
             );
 
-        if (playerX == 0 &&
-            playerZ == 4)
+        Tile[] allTiles =
+            FindObjectsOfType<Tile>();
+
+        foreach (Tile tile in allTiles)
         {
-            WinGame();
+            int tileX =
+                Mathf.RoundToInt(
+                    tile.transform.position.x
+                );
+
+            int tileZ =
+                Mathf.RoundToInt(
+                    tile.transform.position.z
+                );
+
+            if (tileX == playerX &&
+                tileZ == playerZ &&
+                tile.tileType ==
+                Tile.TileType.Gold)
+            {
+                WinGame();
+                return;
+            }
         }
     }
 
@@ -177,22 +207,69 @@ public class PlayerMovement : MonoBehaviour
 
     void WinGame()
     {
+        if (gameWon || gameOver)
+            return;
+
         gameWon = true;
+        canMove = false;
 
         Debug.Log(
             "=============================="
         );
 
-        Debug.Log(
-            "YOU WIN!"
-        );
+        Debug.Log("YOU WIN!");
 
         Debug.Log(
-            "GOAL REACHED!"
+            "GOLD TILE REACHED!"
         );
 
         Debug.Log(
             "=============================="
+        );
+
+        if (redWaveManager != null)
+        {
+            redWaveManager.StopGame();
+        }
+
+        StartCoroutine(
+            RestartAfterDelay()
+        );
+    }
+
+    // ==========================================
+    // GAME OVER
+    // ==========================================
+
+    public void GameOver()
+    {
+        if (gameOver || gameWon)
+            return;
+
+        gameOver = true;
+        canMove = false;
+
+        Debug.Log(
+            "=============================="
+        );
+
+        Debug.Log("GAME OVER!");
+
+        Debug.Log(
+            "=============================="
+        );
+
+        StartCoroutine(
+            RestartAfterDelay()
+        );
+    }
+
+    IEnumerator RestartAfterDelay()
+    {
+        yield return new WaitForSeconds(3f);
+
+        SceneManager.LoadScene(
+            SceneManager.GetActiveScene().name
         );
     }
 }
