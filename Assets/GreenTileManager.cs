@@ -8,9 +8,9 @@ public class GreenTileManager : MonoBehaviour
 
     public int maxGreenTiles = 3;
 
-    public float greenLifetime = 3f;
+    public float greenLifetime = 5f;
 
-    public float spawnInterval = 0.5f;
+    public float spawnInterval = 1.0f;
 
     private Tile[] tiles;
 
@@ -21,8 +21,7 @@ public class GreenTileManager : MonoBehaviour
 
     void Start()
     {
-        redWaveManager =
-            FindObjectOfType<RedWaveManager>();
+        redWaveManager = FindAnyObjectByType<RedWaveManager>();
 
         StartCoroutine(
             GreenTileRoutine()
@@ -44,7 +43,7 @@ public class GreenTileManager : MonoBehaviour
                 yield break;
             }
 
-            RemoveInvalidTiles();
+            //RemoveInvalidTiles();
 
             while (
                 activeGreenTiles.Count <
@@ -53,7 +52,7 @@ public class GreenTileManager : MonoBehaviour
                 SpawnGreenTile();
 
                 yield return
-                    new WaitForSeconds(1.0f);
+                    new WaitForSeconds(5.0f);
             }
 
             yield return
@@ -65,8 +64,7 @@ public class GreenTileManager : MonoBehaviour
 
     void RefreshTiles()
     {
-        tiles =
-            FindObjectsOfType<Tile>();
+        tiles = FindObjectsByType<Tile>();
     }
 
     void SpawnGreenTile()

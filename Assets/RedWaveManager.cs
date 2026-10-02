@@ -156,6 +156,8 @@ public class RedWaveManager : MonoBehaviour
                 Debug.Log(
                     "=============================="
                 );
+
+                gameStopped = true;
             }
 
             UpdateTimer(timerNum);
@@ -410,7 +412,7 @@ public class RedWaveManager : MonoBehaviour
                 if (renderer != null)
                 {
                     renderer.material.color =
-                        Color.orange;
+                        Color.yellow;
                 }
             }
         }

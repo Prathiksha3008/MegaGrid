@@ -14,11 +14,9 @@ public class GoldenTileManager : MonoBehaviour
 
     void Start()
     {
-        tiles =
-            FindObjectsOfType<Tile>();
+        tiles = FindObjectsByType<Tile>();
 
-        redWaveManager =
-            FindObjectOfType<RedWaveManager>();
+        redWaveManager = FindAnyObjectByType<RedWaveManager>();
 
         StartCoroutine(
             WaitForLevelComplete()
@@ -43,8 +41,7 @@ public class GoldenTileManager : MonoBehaviour
     {
         // Refresh tile list in case grid was generated
         // after this manager started.
-        tiles =
-            FindObjectsOfType<Tile>();
+        tiles = FindObjectsByType<Tile>();
 
         List<Tile> availableTiles =
             new List<Tile>();
@@ -61,8 +58,11 @@ public class GoldenTileManager : MonoBehaviour
         if (availableTiles.Count == 0)
         {
             Debug.LogWarning(
-                "No available tile for Golden Tile!"
+                "No available tile for Golden Tile! Spawning at the fallback position."
             );
+
+            goldenTile = availableTiles[0];
+            goldenTile.UpdateColor(Tile.TileType.Gold);
 
             return;
         }
@@ -72,13 +72,6 @@ public class GoldenTileManager : MonoBehaviour
                 0,
                 availableTiles.Count
             );
-
-        goldenTile =
-            availableTiles[randomIndex];
-
-        goldenTile.UpdateColor(
-            Tile.TileType.Gold
-        );
 
         goldSpawned = true;
 
@@ -104,6 +97,13 @@ public class GoldenTileManager : MonoBehaviour
 
         Debug.Log(
             "=============================="
+        );
+
+        goldenTile =
+            availableTiles[randomIndex];
+
+        goldenTile.UpdateColor(
+            Tile.TileType.Gold
         );
     }
 }

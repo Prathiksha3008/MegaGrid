@@ -21,13 +21,14 @@ public class PlayerMovement : MonoBehaviour
     private bool gameWon = false;
     private bool gameOver = false;
 
-    public TextMeshProUGUI GameOverText;
+    public TextMeshProUGUI GameOverText, VictoryText;
 
     private RedWaveManager redWaveManager;
     public void BeginGame()
     {
         gameStarted = true;
         GameOverText.enabled = false;
+        VictoryText.enabled = false;
     }
 
     void Update()
@@ -181,8 +182,7 @@ public class PlayerMovement : MonoBehaviour
                 transform.position.z
             );
 
-        Tile[] allTiles =
-            FindObjectsOfType<Tile>();
+        Tile[] allTiles = FindObjectsByType<Tile>();
 
         foreach (Tile tile in allTiles)
         {
@@ -237,6 +237,8 @@ public class PlayerMovement : MonoBehaviour
         {
             redWaveManager.StopGame();
         }
+
+        VictoryText.enabled = true;
 
         StartCoroutine(
             RestartAfterDelay()
