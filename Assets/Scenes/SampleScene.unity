@@ -540,6 +540,7 @@ MonoBehaviour:
   maxGreenTiles: 3
   greenLifetime: 3
   spawnInterval: 0.5
+  spawnDelay: 0.35
 --- !u!224 &216232080
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2458,7 +2459,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1017667416
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2613,6 +2614,7 @@ MonoBehaviour:
   maxGreenTiles: 3
   greenLifetime: 5
   spawnInterval: 2
+  spawnDelay: 0.35
 --- !u!4 &1059888592
 Transform:
   m_ObjectHideFlags: 0
@@ -3253,7 +3255,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1378393517
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3490,7 +3492,6 @@ MonoBehaviour:
   maximumGameTime: 60
   livesHUD: {fileID: 718486555}
   timerHUD: {fileID: 81095095}
-  goalTile: {fileID: 1787277964}
   levelCompleted: 0
 --- !u!4 &1423735995
 Transform:
