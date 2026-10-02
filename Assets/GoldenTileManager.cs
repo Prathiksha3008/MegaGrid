@@ -18,9 +18,9 @@ public class GoldenTileManager : MonoBehaviour
 
     void Start()
     {
-        tiles = FindObjectsByType<Tile>();
+        tiles = FindObjectsOfType<Tile>();
 
-        redWaveManager = FindAnyObjectByType<RedWaveManager>();
+        redWaveManager = FindObjectOfType<RedWaveManager>();
 
         StartCoroutine(
             WaitForLevelComplete()

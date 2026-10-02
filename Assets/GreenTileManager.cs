@@ -43,7 +43,7 @@ public class GreenTileManager : MonoBehaviour
                 yield break;
             }
 
-            //RemoveInvalidTiles();
+            RemoveInvalidTiles();
 
             while (
                 activeGreenTiles.Count <
@@ -64,7 +64,7 @@ public class GreenTileManager : MonoBehaviour
 
     void RefreshTiles()
     {
-        tiles = FindObjectsByType<Tile>();
+        tiles = FindObjectsOfType<Tile>();
     }
 
     void SpawnGreenTile()

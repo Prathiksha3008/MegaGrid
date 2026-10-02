@@ -182,7 +182,7 @@ public class RedWaveManager : MonoBehaviour
             // how many waves.
             CreateWaves();
 
-            // Orange warning
+            // Yellow warning
             yield return StartCoroutine(
                 FlashWarningRoutine()
             );
