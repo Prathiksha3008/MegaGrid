@@ -1,37 +1,53 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 
 public class GoldenTileManager : MonoBehaviour
 {
     private Tile[] tiles;
-
     private Tile goldenTile;
 
     private RedWaveManager redWaveManager;
 
     private bool goldSpawned = false;
 
-    // In case that the goal tile can't be generated, simply fallback to the win screen instead.
-    private PlayerMovement fallbackVictory;
+    // ==========================================
+    // START
+    // ==========================================
 
     void Start()
     {
-        tiles = FindObjectsOfType<Tile>();
-
-        redWaveManager = FindObjectOfType<RedWaveManager>();
+        redWaveManager =
+            FindObjectOfType<RedWaveManager>();
 
         StartCoroutine(
             WaitForLevelComplete()
         );
     }
 
+    // ==========================================
+    // WAIT FOR SURVIVAL TIMER
+    // ==========================================
+
     IEnumerator WaitForLevelComplete()
     {
-        while (redWaveManager != null &&
-               !redWaveManager.levelCompleted)
+        // Wait until RedWaveManager exists.
+        while (redWaveManager == null)
         {
+            redWaveManager =
+                FindObjectOfType<RedWaveManager>();
+
+            yield return null;
+        }
+
+        // Wait until timer reaches zero.
+        while (!redWaveManager.levelCompleted)
+        {
+            if (redWaveManager.GameStopped)
+            {
+                yield break;
+            }
+
             yield return null;
         }
 
@@ -41,17 +57,27 @@ public class GoldenTileManager : MonoBehaviour
         }
     }
 
+    // ==========================================
+    // SPAWN GOLD
+    // ==========================================
+
     void SpawnGoldenTile()
     {
-        // Refresh tile list in case grid was generated
-        // after this manager started.
-        tiles = FindObjectsByType<Tile>();
+        // Refresh because GridGenerator may
+        // have generated the 9x9 grid.
+        tiles =
+            FindObjectsOfType<Tile>();
 
         List<Tile> availableTiles =
             new List<Tile>();
 
         foreach (Tile tile in tiles)
         {
+            if (tile == null)
+                continue;
+
+            // Only NORMAL tiles are valid.
+            // This prevents Gold from replacing Green.
             if (tile.tileType ==
                 Tile.TileType.Normal)
             {
@@ -62,10 +88,8 @@ public class GoldenTileManager : MonoBehaviour
         if (availableTiles.Count == 0)
         {
             Debug.LogWarning(
-                "No available tile for Golden Tile! Falling back to player winning instead."
+                "No NORMAL tile available for Gold."
             );
-
-            fallbackVictory.WinGame();
 
             return;
         }
@@ -75,6 +99,14 @@ public class GoldenTileManager : MonoBehaviour
                 0,
                 availableTiles.Count
             );
+
+        goldenTile =
+            availableTiles[randomIndex];
+
+        // Actually change the stored state.
+        goldenTile.SetTileType(
+            Tile.TileType.Gold
+        );
 
         goldSpawned = true;
 
@@ -91,7 +123,7 @@ public class GoldenTileManager : MonoBehaviour
             Mathf.RoundToInt(
                 goldenTile.transform.position.x
             ) +
-            "," +
+            ", " +
             Mathf.RoundToInt(
                 goldenTile.transform.position.z
             ) +
@@ -99,14 +131,11 @@ public class GoldenTileManager : MonoBehaviour
         );
 
         Debug.Log(
-            "=============================="
+            "REACH THE GOLD TILE TO WIN!"
         );
 
-        goldenTile =
-            availableTiles[randomIndex];
-
-        goldenTile.UpdateColor(
-            Tile.TileType.Gold
+        Debug.Log(
+            "=============================="
         );
     }
 }

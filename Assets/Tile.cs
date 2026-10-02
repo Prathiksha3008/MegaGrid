@@ -11,17 +11,48 @@ public class Tile : MonoBehaviour
         Gold
     }
 
+    [Header("Tile State")]
     public TileType tileType = TileType.Normal;
 
     private Renderer tileRenderer;
 
-    void Start()
+    void Awake()
     {
         tileRenderer = GetComponent<Renderer>();
-        UpdateColor(tileType);
     }
 
-    public void UpdateColor(TileType tileType)
+    void Start()
+    {
+        RefreshColor();
+    }
+
+    // ==========================================
+    // CHANGE TILE TYPE
+    // ==========================================
+
+    public void SetTileType(TileType newType)
+    {
+        tileType = newType;
+        RefreshColor();
+    }
+
+    // Keep compatibility with your existing code
+    public void UpdateColor(TileType newType)
+    {
+        SetTileType(newType);
+    }
+
+    // ==========================================
+    // REFRESH CURRENT COLOR
+    // Does NOT change tileType
+    // ==========================================
+
+    public void UpdateColor()
+    {
+        RefreshColor();
+    }
+
+    private void RefreshColor()
     {
         if (tileRenderer == null)
         {
@@ -31,42 +62,69 @@ public class Tile : MonoBehaviour
         if (tileRenderer == null)
             return;
 
-        // Turn emission off by default
-        tileRenderer.material.DisableKeyword("_EMISSION");
+        Material mat = tileRenderer.material;
+
+        // Disable emission by default
+        mat.DisableKeyword("_EMISSION");
+
+        if (mat.HasProperty("_EmissionColor"))
+        {
+            mat.SetColor(
+                "_EmissionColor",
+                Color.black
+            );
+        }
 
         switch (tileType)
         {
+            // ======================================
+            // NORMAL
+            // ======================================
+
             case TileType.Normal:
-
-                tileRenderer.material.color =
-                    Color.blue;
-
+                mat.color = Color.blue;
                 break;
+
+            // ======================================
+            // HAZARD
+            // ======================================
 
             case TileType.Hazard:
-
-                tileRenderer.material.color =
-                    Color.red;
-
+                mat.color = Color.red;
                 break;
+
+            // ======================================
+            // GREEN SAFE TILE
+            // ======================================
 
             case TileType.Target:
-
-                tileRenderer.material.color =
-                    Color.green;
-
+                mat.color =
+                    new Color(
+                        0.1f,
+                        1f,
+                        0.2f
+                    );
                 break;
+
+            // ======================================
+            // WARNING
+            // ======================================
 
             case TileType.Warning:
-
-                tileRenderer.material.color =
-                    Color.yellow;
-
+                mat.color =
+                    new Color(
+                        1f,
+                        0.55f,
+                        0f
+                    );
                 break;
+
+            // ======================================
+            // GOLD GOAL
+            // ======================================
 
             case TileType.Gold:
 
-                // Bright yellow
                 Color goldColor =
                     new Color(
                         1f,
@@ -74,18 +132,19 @@ public class Tile : MonoBehaviour
                         0.05f
                     );
 
-                tileRenderer.material.color =
-                    goldColor;
+                mat.color = goldColor;
 
-                // Emissive yellow
-                tileRenderer.material.EnableKeyword(
+                mat.EnableKeyword(
                     "_EMISSION"
                 );
 
-                tileRenderer.material.SetColor(
-                    "_EmissionColor",
-                    goldColor * 4f
-                );
+                if (mat.HasProperty("_EmissionColor"))
+                {
+                    mat.SetColor(
+                        "_EmissionColor",
+                        goldColor * 5f
+                    );
+                }
 
                 break;
         }

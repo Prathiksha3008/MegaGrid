@@ -16,61 +16,124 @@ public class PlayerMovement : MonoBehaviour
     [Header("Grid")]
     public int gridSize = 9;
 
+    [Header("UI")]
+    public TextMeshProUGUI GameOverText;
+    public TextMeshProUGUI VictoryText;
+
     private bool canMove = true;
     private bool gameStarted = false;
     private bool gameWon = false;
     private bool gameOver = false;
 
-    public TextMeshProUGUI GameOverText, VictoryText;
-
     private RedWaveManager redWaveManager;
+
+    // ==========================================
+    // START
+    // ==========================================
+
+    void Start()
+    {
+        redWaveManager =
+            FindObjectOfType<RedWaveManager>();
+
+        if (GameOverText != null)
+        {
+            GameOverText.enabled = false;
+        }
+
+        if (VictoryText != null)
+        {
+            VictoryText.enabled = false;
+        }
+    }
+
+    // ==========================================
+    // BEGIN GAME
+    // ==========================================
+
     public void BeginGame()
     {
         gameStarted = true;
-        GameOverText.enabled = false;
-        VictoryText.enabled = false;
+
+        if (GameOverText != null)
+        {
+            GameOverText.enabled = false;
+        }
+
+        if (VictoryText != null)
+        {
+            VictoryText.enabled = false;
+        }
     }
+
+    // ==========================================
+    // INPUT
+    // ==========================================
 
     void Update()
     {
-        if (!gameStarted || !canMove || gameWon || gameOver)
+        if (!gameStarted ||
+            !canMove ||
+            gameWon ||
+            gameOver)
+        {
+            return;
+        }
+
+        if (Keyboard.current == null)
             return;
 
-        // ==========================================
+        // ======================================
         // FORWARD
-        // ==========================================
+        // W or UP ARROW
+        // ======================================
 
-        if (Keyboard.current.upArrowKey.wasPressedThisFrame)
+        if (
+            Keyboard.current.wKey.wasPressedThisFrame ||
+            Keyboard.current.upArrowKey.wasPressedThisFrame
+        )
         {
             TryMove(Vector3.forward);
             return;
         }
 
-        // ==========================================
+        // ======================================
         // BACK
-        // ==========================================
+        // S or DOWN ARROW
+        // ======================================
 
-        if (Keyboard.current.downArrowKey.wasPressedThisFrame)
+        if (
+            Keyboard.current.sKey.wasPressedThisFrame ||
+            Keyboard.current.downArrowKey.wasPressedThisFrame
+        )
         {
             TryMove(Vector3.back);
             return;
         }
 
-        // ==========================================
+        // ======================================
         // LEFT
-        // ==========================================
+        // A or LEFT ARROW
+        // ======================================
 
-        if (Keyboard.current.leftArrowKey.wasPressedThisFrame)
+        if (
+            Keyboard.current.aKey.wasPressedThisFrame ||
+            Keyboard.current.leftArrowKey.wasPressedThisFrame
+        )
         {
             TryMove(Vector3.left);
             return;
         }
 
-        // ==========================================
+        // ======================================
         // RIGHT
-        // ==========================================
+        // D or RIGHT ARROW
+        // ======================================
 
-        if (Keyboard.current.rightArrowKey.wasPressedThisFrame)
+        if (
+            Keyboard.current.dKey.wasPressedThisFrame ||
+            Keyboard.current.rightArrowKey.wasPressedThisFrame
+        )
         {
             TryMove(Vector3.right);
             return;
@@ -89,14 +152,16 @@ public class PlayerMovement : MonoBehaviour
         Vector3 targetPosition =
             startPosition + direction;
 
-        // ==========================================
-        // 9x9 GRID BOUNDARIES
-        // ==========================================
+        // ======================================
+        // GRID BOUNDARIES
+        // ======================================
 
-        if (targetPosition.x < 0 ||
+        if (
+            targetPosition.x < 0 ||
             targetPosition.x > gridSize - 1 ||
             targetPosition.z < 0 ||
-            targetPosition.z > gridSize - 1)
+            targetPosition.z > gridSize - 1
+        )
         {
             Debug.Log(
                 "CANNOT MOVE OUTSIDE THE GRID!"
@@ -106,7 +171,9 @@ public class PlayerMovement : MonoBehaviour
         }
 
         StartCoroutine(
-            MoveToPosition(targetPosition)
+            MoveToPosition(
+                targetPosition
+            )
         );
     }
 
@@ -161,11 +228,17 @@ public class PlayerMovement : MonoBehaviour
     }
 
     // ==========================================
-    // CHECK GOAL
+    // CHECK GOLD GOAL
     // ==========================================
 
     void CheckForGoal()
     {
+        if (redWaveManager == null)
+        {
+            redWaveManager =
+                FindObjectOfType<RedWaveManager>();
+        }
+
         if (redWaveManager == null)
             return;
 
@@ -182,10 +255,14 @@ public class PlayerMovement : MonoBehaviour
                 transform.position.z
             );
 
-        Tile[] allTiles = FindObjectsByType<Tile>();
+        Tile[] allTiles =
+            FindObjectsOfType<Tile>();
 
         foreach (Tile tile in allTiles)
         {
+            if (tile == null)
+                continue;
+
             int tileX =
                 Mathf.RoundToInt(
                     tile.transform.position.x
@@ -196,10 +273,12 @@ public class PlayerMovement : MonoBehaviour
                     tile.transform.position.z
                 );
 
-            if (tileX == playerX &&
+            if (
+                tileX == playerX &&
                 tileZ == playerZ &&
                 tile.tileType ==
-                Tile.TileType.Gold)
+                    Tile.TileType.Gold
+            )
             {
                 WinGame();
                 return;
@@ -223,7 +302,9 @@ public class PlayerMovement : MonoBehaviour
             "=============================="
         );
 
-        Debug.Log("YOU WIN!");
+        Debug.Log(
+            "YOU WIN!"
+        );
 
         Debug.Log(
             "GOLD TILE REACHED!"
@@ -238,7 +319,10 @@ public class PlayerMovement : MonoBehaviour
             redWaveManager.StopGame();
         }
 
-        VictoryText.enabled = true;
+        if (VictoryText != null)
+        {
+            VictoryText.enabled = true;
+        }
 
         StartCoroutine(
             RestartAfterDelay()
@@ -261,25 +345,37 @@ public class PlayerMovement : MonoBehaviour
             "=============================="
         );
 
-        Debug.Log("GAME OVER!");
+        Debug.Log(
+            "GAME OVER!"
+        );
 
         Debug.Log(
             "=============================="
         );
 
-        GameOverText.enabled = true;
+        if (GameOverText != null)
+        {
+            GameOverText.enabled = true;
+        }
 
         StartCoroutine(
             RestartAfterDelay()
         );
     }
 
+    // ==========================================
+    // RESTART
+    // ==========================================
+
     IEnumerator RestartAfterDelay()
     {
-        yield return new WaitForSeconds(3f);
+        yield return
+            new WaitForSeconds(3f);
 
         SceneManager.LoadScene(
-            SceneManager.GetActiveScene().name
+            SceneManager
+                .GetActiveScene()
+                .name
         );
     }
 }

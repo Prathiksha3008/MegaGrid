@@ -10,33 +10,51 @@ public class GreenTileManager : MonoBehaviour
 
     public float greenLifetime = 5f;
 
-    public float spawnInterval = 1.0f;
+    public float spawnInterval = 1f;
+
+    [Tooltip("Delay between spawning each green tile.")]
+    public float spawnDelay = 0.35f;
 
     private Tile[] tiles;
 
-    private List<Tile> activeGreenTiles =
+    private readonly List<Tile> activeGreenTiles =
         new List<Tile>();
 
     private RedWaveManager redWaveManager;
 
+    // ==========================================
+    // START
+    // ==========================================
+
     void Start()
     {
-        redWaveManager = FindAnyObjectByType<RedWaveManager>();
+        redWaveManager =
+            FindObjectOfType<RedWaveManager>();
 
         StartCoroutine(
             GreenTileRoutine()
         );
     }
 
+    // ==========================================
+    // MAIN LOOP
+    // ==========================================
+
     IEnumerator GreenTileRoutine()
     {
-        // Give the grid time to initialize
+        // Give GridGenerator time to finish.
         yield return null;
 
         RefreshTiles();
 
         while (true)
         {
+            if (redWaveManager == null)
+            {
+                redWaveManager =
+                    FindObjectOfType<RedWaveManager>();
+            }
+
             if (redWaveManager != null &&
                 redWaveManager.GameStopped)
             {
@@ -45,14 +63,23 @@ public class GreenTileManager : MonoBehaviour
 
             RemoveInvalidTiles();
 
+            // Fill available green slots.
             while (
                 activeGreenTiles.Count <
                 maxGreenTiles)
             {
-                SpawnGreenTile();
+                bool spawned =
+                    SpawnGreenTile();
+
+                if (!spawned)
+                {
+                    break;
+                }
 
                 yield return
-                    new WaitForSeconds(5.0f);
+                    new WaitForSeconds(
+                        spawnDelay
+                    );
             }
 
             yield return
@@ -62,20 +89,39 @@ public class GreenTileManager : MonoBehaviour
         }
     }
 
+    // ==========================================
+    // REFRESH TILES
+    // ==========================================
+
     void RefreshTiles()
     {
-        tiles = FindObjectsOfType<Tile>();
+        tiles =
+            FindObjectsOfType<Tile>();
     }
 
-    void SpawnGreenTile()
+    // ==========================================
+    // SPAWN GREEN
+    // ==========================================
+
+    bool SpawnGreenTile()
     {
         RefreshTiles();
+
+        if (tiles == null ||
+            tiles.Length == 0)
+        {
+            return false;
+        }
 
         List<Tile> availableTiles =
             new List<Tile>();
 
         foreach (Tile tile in tiles)
         {
+            if (tile == null)
+                continue;
+
+            // Only Blue / Normal can become Green.
             if (tile.tileType ==
                 Tile.TileType.Normal)
             {
@@ -84,7 +130,9 @@ public class GreenTileManager : MonoBehaviour
         }
 
         if (availableTiles.Count == 0)
-            return;
+        {
+            return false;
+        }
 
         Tile selectedTile =
             availableTiles[
@@ -94,7 +142,8 @@ public class GreenTileManager : MonoBehaviour
                 )
             ];
 
-        selectedTile.UpdateColor(
+        // Store the actual Target state.
+        selectedTile.SetTileType(
             Tile.TileType.Target
         );
 
@@ -107,7 +156,13 @@ public class GreenTileManager : MonoBehaviour
                 selectedTile
             )
         );
+
+        return true;
     }
+
+    // ==========================================
+    // GREEN LIFETIME
+    // ==========================================
 
     IEnumerator RemoveGreenAfterTime(
         Tile tile)
@@ -121,13 +176,17 @@ public class GreenTileManager : MonoBehaviour
             tile.tileType ==
             Tile.TileType.Target)
         {
-            tile.UpdateColor(
+            tile.SetTileType(
                 Tile.TileType.Normal
             );
         }
 
         activeGreenTiles.Remove(tile);
     }
+
+    // ==========================================
+    // CLEAN ACTIVE LIST
+    // ==========================================
 
     void RemoveInvalidTiles()
     {
