@@ -211,7 +211,7 @@ public class PlayerMovement : MonoBehaviour
     // WIN
     // ==========================================
 
-    void WinGame()
+    public void WinGame()
     {
         if (gameWon || gameOver)
             return;

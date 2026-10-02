@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 
 public class GoldenTileManager : MonoBehaviour
 {
@@ -11,6 +12,9 @@ public class GoldenTileManager : MonoBehaviour
     private RedWaveManager redWaveManager;
 
     private bool goldSpawned = false;
+
+    // In case that the goal tile can't be generated, simply fallback to the win screen instead.
+    private PlayerMovement fallbackVictory;
 
     void Start()
     {
@@ -58,11 +62,10 @@ public class GoldenTileManager : MonoBehaviour
         if (availableTiles.Count == 0)
         {
             Debug.LogWarning(
-                "No available tile for Golden Tile! Spawning at the fallback position."
+                "No available tile for Golden Tile! Falling back to player winning instead."
             );
 
-            goldenTile = availableTiles[0];
-            goldenTile.UpdateColor(Tile.TileType.Gold);
+            fallbackVictory.WinGame();
 
             return;
         }
