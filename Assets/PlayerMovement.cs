@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using TMPro;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -20,10 +21,13 @@ public class PlayerMovement : MonoBehaviour
     private bool gameWon = false;
     private bool gameOver = false;
 
+    public TextMeshProUGUI GameOverText;
+
     private RedWaveManager redWaveManager;
     public void BeginGame()
     {
         gameStarted = true;
+        GameOverText.enabled = false;
     }
 
     void Update()
@@ -260,6 +264,8 @@ public class PlayerMovement : MonoBehaviour
         Debug.Log(
             "=============================="
         );
+
+        GameOverText.enabled = true;
 
         StartCoroutine(
             RestartAfterDelay()
